@@ -4,6 +4,7 @@ robot = Robot()
 
 motor_board = robot.motor_board
 servo_board = robot.servo_board
+vacuum = robot.power_board.outputs[OUT_H0]
 
 map = {
     "boundary_0": [i for i in range(0,7)],
@@ -51,8 +52,8 @@ while True:
         current_target = current_target_outer
 
     if current_state[-1] == "searching":
-        robot.motor_board.motors[0].power = -0.1
-        robot.motor_board.motors[1].power = 0.1
+        robot.motor_board.motors[0].power = -0.05
+        robot.motor_board.motors[1].power = 0.05
 
         if target_marker_info != []:
             if type(current_target) == int:
@@ -100,15 +101,17 @@ while True:
             robot.motor_board.motors[0].power = BRAKE
             robot.motor_board.motors[1].power = BRAKE
             if "zone" in current_target_outer:
+                vacuum.is_enabled = True
                 servo_board.servos[0].position = -1
-                robot.sleep(2)
+                robot.sleep(3)
                 servo_board.servos[0].position = 1
                 current_state.append("searching")
                 current_target_outer = "highrise_center"
                 current_target = "highrise_center"
             elif "highrise" in current_target_outer:
-                servo_board.servos[0].position = -1
-                robot.sleep(3)
+                servo_board.servos[0].position = 0.7
+                vacuum.is_enabled = False
+                robot.sleep(1)
                 servo_board.servos[0].position = 1
                 current_state.append("searching")
                 current_target_outer = "zone_0"
