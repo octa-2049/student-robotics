@@ -2,6 +2,8 @@ from sr.robot3 import *
 
 robot = Robot()
 
+zone = robot.zone
+
 motor_board = robot.motor_board
 servo_board = robot.servo_board
 vacuum = robot.power_board.outputs[OUT_H0]
@@ -17,11 +19,13 @@ map = {
     "zone_2": [i for i in range(140, 160)],
     "zone_3": [i for i in range(160,180)],
     "highrise_center": [199],
-    "highrise": [i for i in range(195, 200)]
+    "highrise": [i for i in range(195, 200)],
+    "highrise_0": [195]
        }
 
-current_target_outer = "zone_0"
-current_target = "zone_0"
+current_target_outer = f"highrise_{zone}"
+current_target = f"highrise_{zone}"
+current_target_roll = None
 current_state = ["searching"]
 
 self_zone = 0
@@ -44,8 +48,8 @@ while True:
                 target_marker_info = m
         else:
             if m.id in map[current_target]:
-                print(m)
-                target_marker_info.append({"id": m.id, "distance": m.position.distance})
+                target_marker_info.append({"id": m.id, "distance": m.position.distance, "roll": m.orientation.roll})
+                print(m, target_marker_info)
 
     if target_marker_info == [] and current_state[-1] != "lifting":
         current_state.append("searching")
@@ -59,10 +63,12 @@ while True:
             if type(current_target) == int:
                 pass
             else:
+                robot.sleep(0.1)
                 robot.motor_board.motors[0].power = BRAKE
                 robot.motor_board.motors[1].power = BRAKE
                 target_marker_info.sort(key=sort_distance)
                 current_target = target_marker_info[0]["id"]
+                current_target_roll = target_marker_info[0]["roll"]
                 current_state.append("lining_up")
     elif current_state[-1] == "lining_up":
         if target_marker_info.position.horizontal_angle < -0.05:
@@ -77,6 +83,7 @@ while True:
             robot.motor_board.motors[0].power = BRAKE
             robot.motor_board.motors[1].power = BRAKE
             current_state.append("driving")
+        print("lining up", m, m.orientation)
     elif current_state[-1] == "driving":
         if target_marker_info.position.distance < 500:
             robot.motor_board.motors[0].power = 0.05
@@ -96,6 +103,7 @@ while True:
                 robot.motor_board.motors[0].power = 0.1
                 robot.motor_board.motors[1].power = 0.1
     elif current_state[-1] == "lifting":
+        print("lifting", m, m.orientation)
         distance_mm = robot.arduino.ultrasound_measure(2, 3)
         if distance_mm < 80:
             robot.motor_board.motors[0].power = BRAKE
@@ -121,3 +129,6 @@ while True:
 # implement counter to avoid restacking same boxes + height detection?
 # count how many have been stacked on each high rise
 # add stacked boxes to a list so they aren't stacked again
+
+# NOTE: robot differentiates ids by YAW
+# test with outer highrise
