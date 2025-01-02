@@ -28,8 +28,6 @@ current_target = f"highrise_{zone}"
 current_target_roll = None
 current_state = ["searching"]
 
-self_zone = 0
-
 def sort_distance(e):
     return e["distance"]
 
