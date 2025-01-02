@@ -1,3 +1,7 @@
+# Status
+
+This challenge has been successfully completed.
+
 # Information
 
 This code is out-of-date. For the updated code, see:
