@@ -32,6 +32,7 @@ class MyRobot(Robot):
         """
         if force_update or (self.time() - self.last_refresh) > self.refresh_interval:
             self.markers = self.camera.see()
+            self.last_refesh = self.time()
 
     def calculate_path(self, target_id, target_roll = None):
         """
