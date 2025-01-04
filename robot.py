@@ -2,9 +2,9 @@ import math
 
 from sr.robot3 import *
 from math import degrees, radians
+from enum import Enum
 
-
-def round_10(n) -> int:
+def round_10(n: float) -> int:
     """
     Rounds a number to the nearest tenth.
 
@@ -14,27 +14,70 @@ def round_10(n) -> int:
     """
     return round(math.degrees(n) / 10) * 10
 
+class State(Enum):
+    INITIAL = "initial"
+    SEARCH_1 = "search_1"
 
 class MyRobot(Robot):
     def __init__(self) -> None:
         """Initialises the robot."""
         Robot.__init__(self)
         self.vacuum = self.power_board.outputs[OUT_H0]
+        self.vacuum.is_enabled = False
         self.markers = []
         self.last_refresh = 0
         self.refresh_interval = 0.05
+        self.left_motor = self.motor_board.motors[0]
+        self.right_motor = self.motor_board.motors[1]
 
-    def see(self, force_update = False) -> None:
+        self.target_id = None
+        self.target_roll = None
+
+        self.own_pallets = f"pallets_{self.zone}"
+        self.target_zone = self.own_pallets
+
+        self.status = State.INITIAL
+        self.activity_start_time = 0
+
+    def see(self, force_update: bool = False) -> None:
         """
-        Fetches and saves marker ids currently in view, if more than self.refresh_interval seconds have passed since the last update.
+        Fetches and saves the marker ids currently in view, if more than self.refresh_interval seconds have passed since the last update.
 
         :param bool force_update: [optional] Force updates the marker ids if True. Defaults to False.
         """
         if force_update or (self.time() - self.last_refresh) > self.refresh_interval:
             self.markers = self.camera.see()
-            self.last_refesh = self.time()
+            self.last_refresh = self.time()
 
-    def calculate_path(self, target_id, target_roll = None):
+    def turn(self, speed: float = 0.1) -> None:
+        """
+        Turns the robot clockwise on-the-spot at the given speed. Input a negative speed to turn the robot anti-clockwise.
+
+        :param float speed: The speed, from -1 to 1.
+        """
+        self.left_motor.power = speed
+        self.right_motor.power = -speed
+
+    # def motor_control(self, command: MotorPower = None) -> None:
+    #     """
+    #     Duplicates a command across all motors.
+    #
+    #     :param MotorPower command: The command to be executed [BRAKE/ COAST].
+    #     """
+    #     self.left_motor.power = command
+    #     self.right_motor.power = command
+
+    def brake(self) -> None:
+        """Brakes all motors."""
+        self.left_motor.power = BRAKE
+        self.right_motor.power = BRAKE
+
+    def coast(self) -> None:
+        """Coasts all motors."""
+        self.left_motor.power = COAST
+        self.right_motor.power = COAST
+
+    def calculate_path(self, target_id: int, target_roll: int = None):
         """
         Calculates the path between the robot and the target marker.
 
@@ -43,6 +86,46 @@ class MyRobot(Robot):
 
         :return: The path between the robot and the target marker.
         """
+        pass
+
+    def target_visible(self, target: str | int) -> bool:
+        """
+        Checks if the target zone or id is visible. If the target is a zone, the target id is set to that of the first visible marker.
+
+        :param str|int target: The target zone or id.
+
+        :return: True if the target zone or id is visible, False otherwise.
+        """
+        if type(target) is str:
+            for marker in self.markers:
+                if marker.id in arena.map[target]:
+                    self.target_id = marker.id
+                    # self.target_roll = round_10(marker.orientation.roll)
+                    return True
+            return False
+        else:
+            for marker in self.markers:
+                if marker.id == target:
+                    return True
+            return False
+
+    def select_target_id(self) -> bool:
+        """
+        Stops the robot if a target id is visible. The target_visible function called also sets the target id.
+
+        :return: Whether the robot has stopped.
+        """
+        if self.target_visible(self.target_zone):
+            self.coast()
+            return True
+        return False
+
+    def select_target_roll(self):
+        """
+        Selects the target roll.
+        """
+        pass
+
 
 class Arena:
     def __init__(self) -> None:
@@ -63,9 +146,8 @@ class Arena:
         self.highriseInfo = {}
         for highrise in self.map["highrise"]:
             self.highriseInfo[highrise] = []
-        print(self.highriseInfo)
 
-    def get_highrise_height(self, highrise_id) -> int:
+    def get_highrise_height(self, highrise_id: int) -> int:
         """
         Returns the height of a highrise.
 
@@ -77,3 +159,25 @@ class Arena:
 
 robot = MyRobot()
 arena = Arena()
+
+robot.see()         # Initialises the camera. There is a noticeable delay when capturing the first frame, so the camera needs to be initialised outside the main loop.
+robot.sleep(0.5)
+
+while True:
+    robot.see()
+    match robot.status:
+        case State.INITIAL:
+            robot.turn()
+            robot.activity_start_time = robot.time()
+            robot.activity_stop_time = robot.activity_start_time + 11    # Activity time-out occurs after 11 seconds (when the robot has turned 360 degrees).
+            robot.status = State.SEARCH_1
+        case State.SEARCH_1:
+            is_target_found = robot.select_target_id()
+            match is_target_found:
+                case True:
+                    # The robot found a target id within 11 seconds of the activity starting.
+                    print(robot.target_id, robot.target_roll)
+                    pass
+                case False if robot.time() > robot.activity_stop_time:
+                    # The robot turned on the spot for 11 seconds without finding a target id. Initiate backup search algorithm / change robot position.
+                    pass
