@@ -1,12 +1,11 @@
 import math
 
 from sr.robot3 import *
-from math import degrees, radians
 from enum import Enum
 
 def round_10(n: float) -> int:
     """
-    Rounds a number to the nearest tenth.
+    Converts an angle in radians to degrees and rounds it to the nearest tenth.
 
     :param float n: The number to be rounded.
 
@@ -18,6 +17,11 @@ class State(Enum):
     INITIAL = "initial"
     SEARCH_1 = "search_1"
 
+class MarkerProperty(Enum):
+    ID = "marker.id"
+    ROLL = "marker.orientation.roll"
+    DISTANCE = "marker.position.distance"
+
 class MyRobot(Robot):
     def __init__(self) -> None:
         """Initialises the robot."""
@@ -25,6 +29,8 @@ class MyRobot(Robot):
         self.vacuum = self.power_board.outputs[OUT_H0]
         self.vacuum.is_enabled = False
         self.markers = []
+        self.filtered_markers = []
+        self.filter_properties = []
         self.last_refresh = 0
         self.refresh_interval = 0.05
         self.left_motor = self.motor_board.motors[0]
@@ -39,7 +45,7 @@ class MyRobot(Robot):
         self.status = State.INITIAL
         self.activity_start_time = 0
 
-    def see(self, force_update: bool = False) -> None:
+    def see(self, force_update: bool = False) -> bool:
         """
         Fetches and saves the marker ids currently in view, if more than self.refresh_interval seconds have passed since the last update.
 
@@ -48,6 +54,8 @@ class MyRobot(Robot):
         if force_update or (self.time() - self.last_refresh) > self.refresh_interval:
             self.markers = self.camera.see()
             self.last_refresh = self.time()
+            return True
+        return False
 
     def turn(self, speed: float = 0.1) -> None:
         """
@@ -57,15 +65,6 @@ class MyRobot(Robot):
         """
         self.left_motor.power = speed
         self.right_motor.power = -speed
-
-    # def motor_control(self, command: MotorPower = None) -> None:
-    #     """
-    #     Duplicates a command across all motors.
-    #
-    #     :param MotorPower command: The command to be executed [BRAKE/ COAST].
-    #     """
-    #     self.left_motor.power = command
-    #     self.right_motor.power = command
 
     def brake(self) -> None:
         """Brakes all motors."""
@@ -100,7 +99,6 @@ class MyRobot(Robot):
             for marker in self.markers:
                 if marker.id in arena.map[target]:
                     self.target_id = marker.id
-                    # self.target_roll = round_10(marker.orientation.roll)
                     return True
             return False
         else:
@@ -111,7 +109,7 @@ class MyRobot(Robot):
 
     def select_target_id(self) -> bool:
         """
-        Stops the robot if a target id is visible. The target_visible function called also sets the target id.
+        Stops the robot if a target id within self.target_zone is visible. The target_visible function called also sets the target id.
 
         :return: Whether the robot has stopped.
         """
@@ -121,10 +119,9 @@ class MyRobot(Robot):
         return False
 
     def select_target_roll(self):
-        """
-        Selects the target roll.
-        """
-        pass
+        """Selects the target roll and sets it to self.target_roll."""
+        self.target_roll = round_10([marker for marker in sorted(self.markers, key = lambda marker: (abs(marker.orientation.yaw))) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
+        print([(marker.id, round_10(marker.orientation.roll), marker.orientation.yaw) for marker in sorted(self.markers, key = lambda marker: (abs(marker.orientation.yaw))) if marker.id == self.target_id])
 
 
 class Arena:
@@ -143,7 +140,7 @@ class Arena:
             "highrise": [i for i in range(195, 200)],
             "highrise_0": [195]
         }
-        self.highriseInfo = {}
+        self.highriseInfo = {}      # Stores information about the pallets in each highrise, i.e. team, id, etc.
         for highrise in self.map["highrise"]:
             self.highriseInfo[highrise] = []
 
@@ -164,20 +161,24 @@ robot.see()         # Initialises the camera. There is a noticeable delay when c
 robot.sleep(0.5)
 
 while True:
-    robot.see()
+    refreshed_camera = robot.see()
     match robot.status:
         case State.INITIAL:
             robot.turn()
             robot.activity_start_time = robot.time()
             robot.activity_stop_time = robot.activity_start_time + 11    # Activity time-out occurs after 11 seconds (when the robot has turned 360 degrees).
             robot.status = State.SEARCH_1
-        case State.SEARCH_1:
+        case State.SEARCH_1 if refreshed_camera:    # Performance improvement; prevents code from running if camera hasn't updated. Remove 'if refreshed_camera' if self.refresh_interval is particularly high as the robot may take longer than expected to sop if no target id is found.
             is_target_found = robot.select_target_id()
             match is_target_found:
                 case True:
                     # The robot found a target id within 11 seconds of the activity starting.
-                    print(robot.target_id, robot.target_roll)
-                    pass
+                    #robot.sleep(0.5)    # Wait for the robot to come to a complete stop.
+                    robot.select_target_roll()
+                    print(robot.target_roll)
                 case False if robot.time() > robot.activity_stop_time:
                     # The robot turned on the spot for 11 seconds without finding a target id. Initiate backup search algorithm / change robot position.
                     pass
+
+# add error-detection when found id goes out-of-view
+# https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
