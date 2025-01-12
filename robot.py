@@ -21,7 +21,7 @@ def round_90(n: float) -> int:
 
     :return: The rounded number.
     """
-    return round(round(math.degrees(n)/10)/1/9) * 90
+    return round(math.degrees(n)/10/1/9) * 90
 
 class State(Enum):
     INITIAL = "initial"
