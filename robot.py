@@ -13,6 +13,16 @@ def round_10(n: float) -> int:
     """
     return round(math.degrees(n) / 10) * 10
 
+def round_90(n: float) -> int:
+    """
+    Converts an angle in radians to degrees and rounds it to the nearest 90 degrees.
+
+    :param float n: The number to be rounded.
+
+    :return: The rounded number.
+    """
+    return round(round(math.degrees(n)/10)/1/9) * 90
+
 class State(Enum):
     INITIAL = "initial"
     SEARCH_1 = "search_1"
@@ -119,7 +129,7 @@ class MyRobot(Robot):
         return False
 
     def select_target_roll(self):
-        """Selects the target roll and sets it to self.target_roll."""
+        """Selects the target roll (lowest absolute value of yaw relative to the camera) and sets it to self.target_roll."""
         self.target_roll = round_10([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
         print([(marker.id, round_10(marker.orientation.roll), math.degrees(marker.orientation.yaw), math.degrees(marker.orientation.pitch)) for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id])
 
@@ -173,7 +183,7 @@ while True:
             match is_target_found:
                 case True:
                     # The robot found a target id within 11 seconds of the activity starting.
-                    #robot.sleep(0.5)    # Wait for the robot to come to a complete stop.
+                    # robot.sleep(0.5)    # Wait for the robot to come to a complete stop.
                     robot.select_target_roll()
                     print(robot.target_roll)
                 case False if robot.time() > robot.activity_stop_time:
@@ -181,4 +191,5 @@ while True:
                     pass
 
 # add error-detection when found id goes out-of-view
+# round to nearest 45/90 degrees rather than 10 as roll property can sometimes be unreliable
 # https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
