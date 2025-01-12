@@ -120,8 +120,8 @@ class MyRobot(Robot):
 
     def select_target_roll(self):
         """Selects the target roll and sets it to self.target_roll."""
-        self.target_roll = round_10([marker for marker in sorted(self.markers, key = lambda marker: (abs(marker.orientation.yaw))) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
-        print([(marker.id, round_10(marker.orientation.roll), marker.orientation.yaw) for marker in sorted(self.markers, key = lambda marker: (abs(marker.orientation.yaw))) if marker.id == self.target_id])
+        self.target_roll = round_10([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
+        print([(marker.id, round_10(marker.orientation.roll), math.degrees(marker.orientation.yaw), math.degrees(marker.orientation.pitch)) for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id])
 
 
 class Arena:
