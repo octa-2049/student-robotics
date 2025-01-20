@@ -298,7 +298,7 @@ while True:
                 case True if math.degrees(abs(robot.target_object.position.horizontal_angle)) > 1 and robot.target_object.position.distance > 300:
                     robot.turn(speed=0.05, reverse=robot.target_object.position.horizontal_angle < 0)
                     robot.status = State.TRAVEL_3
-                case False if robot.front_ultrasound < 50:
+                case False if robot.front_ultrasound < 30: # Robot hits box so the vacuum is centred
                     robot.brake()
 
 
