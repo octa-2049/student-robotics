@@ -26,6 +26,10 @@ def round_90(n: float) -> int:
 class State(Enum):
     INITIAL = "initial"
     SEARCH_1 = "search_1"
+    TRAVEL_1 = "travel_1"
+    TRAVEL_2 = "travel_2"
+    TRAVEL_3 = "travel_3"
+    TRAVEL_4 = "travel_4"
 
 class MarkerProperty(Enum):
     ID = "marker.id"
@@ -46,8 +50,19 @@ class MyRobot(Robot):
         self.left_motor = self.motor_board.motors[0]
         self.right_motor = self.motor_board.motors[1]
 
+        self.default_speed = 0.1
+        self.wheel_radius = 0.05 # in meters
+
+        self.front_ultrasound = 0
+
         self.target_id = None
         self.target_roll = None
+        self.target_object = None
+
+        self.perpendicular_distance = 0
+        self.travel_distance = 0
+        self.real_yaw = 0
+        self.reverse = None
 
         self.own_pallets = f"pallets_{self.zone}"
         self.target_zone = self.own_pallets
@@ -67,14 +82,27 @@ class MyRobot(Robot):
             return True
         return False
 
-    def turn(self, speed: float = 0.1) -> None:
+    def turn(self, speed: float = 0.1, reverse = False) -> None:
         """
         Turns the robot clockwise on-the-spot at the given speed. Input a negative speed to turn the robot anti-clockwise.
 
-        :param float speed: The speed, from -1 to 1.
+        :param float speed: [optional] The speed, from -1 to 1.
+        :param bool reverse: [optional] Reverse the turn direction. Defaults to False.
         """
-        self.left_motor.power = speed
-        self.right_motor.power = -speed
+        if not reverse:
+            self.left_motor.power = speed
+            self.right_motor.power = -speed
+        else:
+            self.left_motor.power = -speed
+            self.right_motor.power = speed
+
+    def move(self, speed: float = 0.1, reverse = False) -> None:
+        if not reverse:
+            self.left_motor.power = speed
+            self.right_motor.power = speed
+        else:
+            self.left_motor.power = -speed
+            self.right_motor.power = -speed
 
     def brake(self) -> None:
         """Brakes all motors."""
@@ -91,7 +119,7 @@ class MyRobot(Robot):
         Calculates the path between the robot and the target marker.
 
         :param int target_id: The id of the target marker.
-        :param int target_roll: [optional] The roll of the target marker; this differentiates between the faces of the marker. This value should be pre-normalised using round_10().
+        :param int target_roll: [optional] The roll of the target marker; this differentiates between the faces of the marker. This value should be pre-normalised using round_90().
 
         :return: The path between the robot and the target marker.
         """
@@ -130,8 +158,39 @@ class MyRobot(Robot):
 
     def select_target_roll(self):
         """Selects the target roll (lowest absolute value of yaw relative to the camera) and sets it to self.target_roll."""
-        self.target_roll = round_10([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
-        print([(marker.id, round_10(marker.orientation.roll), math.degrees(marker.orientation.yaw), math.degrees(marker.orientation.pitch)) for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_10(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id])
+        self.target_roll = round_90([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_90(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
+        print([(marker.id, marker.size, round_90(marker.orientation.roll), math.degrees(marker.orientation.yaw), math.degrees(marker.orientation.pitch)) for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_90(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id])
+
+    def select_target_object(self) -> bool:
+        """
+        Saves the appropriate marker object with matching id and roll to self.target_object. Returns False if not visible.
+
+        :return: Whether the selected marker face is visible."""
+        try:
+            self.target_object = [marker for marker in self.markers if marker.id == self.target_id and round_90(marker.orientation.roll) == self.target_roll][0]
+            return True
+        except:
+            # self.target_object = None
+            return False
+
+    def calculate_real_yaw(self):
+        """Calculates the marker's yaw from the perspective of the camera."""
+        self.real_yaw = self.target_object.orientation.yaw if abs(round_90(self.target_object.orientation.roll)) != 90 else self.target_object.orientation.pitch
+
+    def calculate_perpendicular_distance(self):
+        self.perpendicular_distance = (self.target_object.position.distance * math.sin(self.target_object.position.horizontal_angle)) / math.sin(math.pi - abs(self.real_yaw) - abs(self.target_object.position.horizontal_angle))
+
+    def calculate_travel_distance(self):
+        self.travel_distance = (self.target_object.position.distance * math.sin(self.real_yaw)) / math.sin(math.pi - abs(self.real_yaw) - abs(self.target_object.position.horizontal_angle))
+
+    def update_ultrasound(self):
+        self.front_ultrasound = self.arduino.ultrasound_measure(2, 3)
+
+    # def calculate_turn_direction(self):
+    #     modifier = (self.perpendicular_distance < 0 and self.travel_distance < 0) or (self.perpendicular_distance > 0 and self.travel_distance > 0)
+    #     has_negative_travel_distance = self.travel_distance < 0
+    #     distance_satisfied = abs(self.perpendicular_distance) > 300
+    #     if distance_satisfied:
 
 
 class Arena:
@@ -172,6 +231,8 @@ robot.sleep(0.5)
 
 while True:
     refreshed_camera = robot.see()
+    # if refreshed_camera and robot.target_id is not None and robot.target_roll is not None:
+    #     robot.select_target_object()
     match robot.status:
         case State.INITIAL:
             robot.turn()
@@ -185,11 +246,63 @@ while True:
                     # The robot found a target id within 11 seconds of the activity starting.
                     # robot.sleep(0.5)    # Wait for the robot to come to a complete stop.
                     robot.select_target_roll()
-                    print(robot.target_roll)
+                    robot.status = State.TRAVEL_1
+                    robot.activity_start_time = robot.time()
+                    robot.activity_stop_time = robot.activity_start_time + 11
                 case False if robot.time() > robot.activity_stop_time:
                     # The robot turned on the spot for 11 seconds without finding a target id. Initiate backup search algorithm / change robot position.
                     pass
+        case State.TRAVEL_1 if refreshed_camera:
+            is_target_in_view = robot.select_target_object() # fix marker goes out of view + negative values + marker to the right, replace distance with horizontal distance (accounting for vertical angle etc.)
+            match is_target_in_view:
+                case True:
+                    robot.calculate_real_yaw()
+                    robot.calculate_travel_distance()
+                    robot.calculate_perpendicular_distance()
+                    if abs(robot.perpendicular_distance) > 300 and not ((robot.perpendicular_distance < 0 and robot.travel_distance < 0) or (robot.perpendicular_distance > 0 and robot.travel_distance > 0)):
+                        robot.reverse = robot.travel_distance < 0
+                        robot.turn(reverse = robot.reverse)
+                    elif 300 < abs(robot.perpendicular_distance):
+                        robot.brake()
+                        robot.status = State.TRAVEL_2
+                        robot.activity_start_time = robot.time()
+                        robot.move()
+                        robot.activity_stop_time = robot.activity_start_time + ((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        print("travel time:", (robot.travel_distance * 0.001) / (robot.default_speed * 25 * robot.wheel_radius))
+                    else:
+                        robot.reverse = robot.travel_distance > 0
+                        robot.turn(reverse = robot.reverse)
+                case False if robot.time() > robot.activity_stop_time:
+                    pass
+        case State.TRAVEL_2:
+            if robot.time() > robot.activity_stop_time:
+                robot.brake()
+                robot.status = State.TRAVEL_3
+                robot.refresh_interval = 0.001
+                robot.activity_start_time = robot.time()
+                robot.turn(speed = 0.05, reverse = robot.reverse)
+                robot.activity_stop_time = robot.activity_start_time + 13
+        case State.TRAVEL_3:
+            is_target_in_view = robot.select_target_object()
+            match is_target_in_view:
+                case True:
+                    if math.degrees(abs(robot.target_object.position.horizontal_angle)) < 1:
+                        robot.move()
+                        robot.status = State.TRAVEL_4
+                case False if robot.time() > robot.activity_stop_time:
+                    pass
+        case State.TRAVEL_4:
+            robot.update_ultrasound()
+            is_target_in_view = robot.select_target_object()
+            match is_target_in_view:
+                case True if math.degrees(abs(robot.target_object.position.horizontal_angle)) > 1 and robot.target_object.position.distance > 300:
+                    robot.turn(speed=0.05, reverse=robot.target_object.position.horizontal_angle < 0)
+                    robot.status = State.TRAVEL_3
+                case False if robot.front_ultrasound < 50:
+                    robot.brake()
+
+
+            print(robot.travel_distance, robot.perpendicular_distance, robot.target_object.position.distance, math.degrees(robot.real_yaw), robot.front_ultrasound)
 
 # add error-detection when found id goes out-of-view
-# round to nearest 45/90 degrees rather than 10 as roll property can sometimes be unreliable
 # https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
