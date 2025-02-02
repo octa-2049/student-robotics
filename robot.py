@@ -244,8 +244,12 @@ class Arena:
             "pallets_3": [i for i in range(160, 180)],
             "highrise_center": [199],
             "highrise": [i for i in range(195, 200)],
-            "highrise_0": [195]
+            "highrise_0": [195],
+            "highrise_targets": [199] # broken
         }
+
+        self.map["highrise_targets"].extend(self.map[robot.own_highrise]) # NOT APPEND - append gives [199, [195]] which won't work
+
         self.highrise_capacity = {
             195: 2,
             199: 1
@@ -271,7 +275,7 @@ class Arena:
         elif len(self.highrise_info[highrise_id]) < self.highrise_capacity[highrise_id]:
             return 30
         else:
-            return 120
+            return 190
 
 
 robot = MyRobot()
@@ -325,19 +329,22 @@ while True:
                         robot.status = State.TRAVEL_2
                         robot.activity_start_time = robot.time()
                         robot.move()
-                        robot.activity_stop_time = robot.activity_start_time + ((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
                         print("travel time:", (robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
                     else:
                         robot.reverse = robot.travel_distance > 0
                         robot.turn(reverse = robot.reverse)
                         # robot.reverse = robot.travel_distance < 0
                         # robot.turn(reverse = robot.reverse)
+                        print("BACKUP TRAVEL_1")
                         robot.sleep(1)
                         robot.brake()
                         robot.status = State.TRAVEL_2
                         robot.activity_start_time = robot.time()
                         robot.move()
-                        robot.activity_stop_time = robot.activity_start_time + ((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
                         print("travel time:", (robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
 
                 case False if robot.time() > robot.activity_stop_time:
@@ -380,9 +387,10 @@ while True:
 
             print(robot.travel_distance, robot.perpendicular_distance, robot.target_object.position.distance, math.degrees(robot.real_yaw), robot.front_ultrasound)
         case State.PICKUP_1:
+            robot.sleep(1) # allows for box to be fully picked up before ultrasound reading taken
             robot.update_ultrasound()
             if robot.front_ultrasound < 30:
-                # untested
+                # broken? intended to detect if the pallet was actually successfully picked up
                 robot.move(reverse = True)
                 robot.sleep(1)
                 robot.status = State.TRAVEL_4
@@ -400,6 +408,9 @@ while True:
             robot.status = State.INITIAL
 
 
-# fix boolean logic - does not work properly when dragged in front of camera etc.
+# fix boolean logic - does not work properly when dragged in front of camera etc. - perhaps hardcode turn directions (i.e. first 3 boxes: turn right then turn left) etc.
 # add error-detection when found id goes out-of-view
 # https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
+
+# calculate travel time with acceleration in mind?
+# add condition so that robot picks up pallet if pallet touches sensors; ultrasound doesn't always work
