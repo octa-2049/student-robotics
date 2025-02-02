@@ -421,19 +421,19 @@ while True:
                     robot.sleep(0.5)
                     robot.vacuum_control()
                     if robot.status == State.PICKUP_1: # allows for box to be fully picked up before ultrasound reading taken
-                        robot.sleep(1)
+                        robot.sleep(1.5)
 
             print(robot.travel_distance, robot.perpendicular_distance, robot.target_object.position.distance, math.degrees(robot.real_yaw), robot.front_ultrasound)
         case State.PICKUP_1:
             robot.update_ultrasound()
             if robot.front_ultrasound < 50 or robot.front_left_microswitch or robot.front_right_microswitch:
                 # broken? intended to detect if the pallet was actually successfully picked up
-                robot.move(reverse = True)
+                # robot.move(reverse = True)
                 robot.vacuum_control()
-                robot.sleep(0.5)
+                robot.sleep(1.5)
                 robot.status = State.TRAVEL_4
             else:
-                robot.target_zone = robot.own_highrise
+                robot.target_zone = robot.own_highrise # TODO if len(arena.excluded_pallets) < 4 else "highrise_center" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
                 robot.pallet_in_possession = robot.target_id
                 robot.status = State.INITIAL
                 robot.reverse = not robot.reverse
@@ -462,3 +462,5 @@ while True:
 
 # calculate travel time with acceleration in mind?
 # add condition so that robot picks up pallet if pallet touches sensors; ultrasound doesn't always work
+
+# TODO fix camera refresh interval after 4th pallet
