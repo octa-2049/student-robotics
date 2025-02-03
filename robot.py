@@ -431,7 +431,7 @@ while True:
                 # robot.move(reverse = True)
                 robot.vacuum_control()
                 robot.sleep(1.5)
-                robot.status = State.TRAVEL_4
+                # robot.status = State.TRAVEL_4 # causes infinite loop
             else:
                 robot.target_zone = robot.own_highrise # TODO if len(arena.excluded_pallets) < 4 else "highrise_center" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
                 robot.pallet_in_possession = robot.target_id
