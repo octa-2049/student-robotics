@@ -376,7 +376,7 @@ while True:
                         robot.status = State.TRAVEL_2
                         robot.move()
                         robot.activity_start_time = robot.time()
-                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
+                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius)) # TODO bug if changed to 1.1/1.2
                         print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
                         print("travel time:", abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius)))
 
