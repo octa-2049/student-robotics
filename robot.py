@@ -253,6 +253,9 @@ class Arena:
             "highrise_center": [199],
             "highrise": [i for i in range(195, 200)],
             "highrise_0": [195],
+            "highrise_1": [196],
+            "highrise_2": [197],
+            "highrise_3": [198],
             "highrise_targets": [199] # broken
         }
 
@@ -260,6 +263,9 @@ class Arena:
 
         self.highrise_capacity = {
             195: 2,
+            196: 2,
+            197: 2,
+            198: 2,
             199: 1
         }
         self.highrise_info = {}      # Stores information about the pallets in each highrise, i.e. team, id, etc.
