@@ -27,6 +27,14 @@ def round_90(n: float) -> int:
     """
     return round(math.degrees(n)/10/1/9) * 90
 
+def calculate_real_yaw_any(marker_object):
+    roll_cache = round_90(marker_object.orientation.roll)
+    is_roll_negative = -1 if roll_cache < 0 or roll_cache == 180 else 1
+    if roll_cache == 0 or roll_cache == 180 or roll_cache == -180:
+        return is_roll_negative * marker_object.orientation.yaw
+    else:
+        return is_roll_negative * marker_object.orientation.pitch
+
 class State(Enum):
     INITIAL = "initial"
     SEARCH_1 = "search_1"
@@ -163,8 +171,9 @@ class MyRobot(Robot):
         if len(cache_markers) == 0:
             return False
         else:
-            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance)[0].id
-            return True
+            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance if abs(math.degrees(calculate_real_yaw_any(marker))) < 80 else float('inf'))[0].id
+            print(self.target_id, abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))))
+            return abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))) < 80
 
     def select_target_id(self) -> bool:
         """
@@ -314,7 +323,7 @@ while True:
     match robot.status:
         case State.INITIAL:
             robot.refresh_interval = 0.05
-            robot.turn(reverse = False if len(arena.excluded_pallets) < 3 else True)
+            robot.turn(reverse = False if len(arena.excluded_pallets) < 5 and not (len(arena.excluded_pallets) == 0 and "highrise" in robot.target_zone) else True)
             robot.activity_start_time = robot.time()
             robot.activity_stop_time = robot.activity_start_time + 11    # Activity time-out occurs after 11 seconds (when the robot has turned 360 degrees).
             robot.status = State.SEARCH_1
@@ -344,7 +353,7 @@ while True:
                     print("REAL YAW", math.degrees(robot.real_yaw), "RAW_ROLL", math.degrees(robot.target_object.orientation.roll), "ROLL", round_90(robot.target_object.orientation.roll), "YAW", math.degrees(robot.target_object.orientation.yaw), "PITCH", math.degrees(robot.target_object.orientation.pitch), "HORIZONTAL ANGLE", math.degrees(robot.target_object.position.horizontal_angle))
                     robot.calculate_travel_distance()
                     robot.calculate_perpendicular_distance()
-                    print(robot.perpendicular_distance, robot.target_object.position.horizontal_angle)
+                    print(robot.perpendicular_distance, math.degrees(robot.target_object.position.horizontal_angle))
                     robot.reverse = robot.real_yaw < 0
                     # TODO update boolean logic as may not work in some scenarios + infinite loop if marker starts too close
                     # if abs(robot.perpendicular_distance) > 400 and not ((robot.perpendicular_distance < 0 and robot.travel_distance < 0) or (robot.perpendicular_distance > 0 and robot.travel_distance > 0)):
@@ -410,17 +419,23 @@ while True:
             robot.status = State.TRAVEL_3
             robot.refresh_interval = 0.001
             robot.activity_start_time = robot.time()
-            robot.turn(speed= 0.5 * DEFAULT_ROTATION)
-            robot.activity_stop_time = robot.activity_start_time + 13
+            robot.turn(speed= 0.5 * DEFAULT_ROTATION, reverse = robot.reverse)
+            # robot.activity_stop_time = robot.activity_start_time + 13
         case State.TRAVEL_3:
             is_target_in_view = robot.select_target_object()
+            robot.update_ultrasound()
+            print("TRAVEL_3 is_target_in_view", is_target_in_view, "ultrasound_front", robot.front_ultrasound)
             match is_target_in_view:
                 case True:
-                    if math.degrees(abs(robot.target_object.position.horizontal_angle)) < 1:
+                    if math.degrees(abs(robot.target_object.position.horizontal_angle)) < 1.5:
                         robot.move(0.1)
                         robot.status = State.TRAVEL_4
                 case False if robot.time() > robot.activity_stop_time:
                     pass
+                case False if robot.front_ultrasound < 205 and robot.front_ultrasound != 0:
+                    robot.move(reverse = True)
+                    robot.sleep(0.2)
+                    robot.status = State.TRAVEL_2A
         case State.TRAVEL_4:
             robot.update_ultrasound()
             is_target_in_view = robot.select_target_object()
@@ -447,24 +462,29 @@ while True:
                 robot.sleep(1.5)
                 # robot.status = State.TRAVEL_4 # causes infinite loop
             else:
-                robot.target_zone = robot.own_highrise # TODO if len(arena.excluded_pallets) < 4 else "highrise_center" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
+                robot.target_zone = robot.own_highrise if len(arena.excluded_pallets) != 3 else "highrise_center" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
                 robot.pallet_in_possession = robot.target_id
                 robot.status = State.INITIAL
-                robot.reverse = not robot.reverse
+                robot.reverse = not robot.reverse if len(arena.excluded_pallets) != 0 else robot.reverse
 
         case State.DROP_1:
+            robot.sleep(0.5)
             robot.target_zone = robot.own_pallets
             arena.highrise_info[robot.target_id].append(robot.pallet_in_possession)
             arena.excluded_pallets.append(robot.pallet_in_possession)
 
             robot.move(reverse=True)
-            if len(arena.excluded_pallets) != 3:
-                robot.sleep(0.2)
-            else:
+            if len(arena.excluded_pallets) == 3:
                 robot.sleep(1.5)
                 # DEFAULT_ROTATION = -0.1
                 robot.turn(-0.1)
                 robot.sleep(0.5)
+            elif len(arena.excluded_pallets) == 4:
+                robot.sleep(1.5)
+                robot.turn(0.1)
+                robot.sleep(0.5)
+            else:
+                robot.sleep(0.2)
 
             robot.status = State.INITIAL
             robot.reverse = False
