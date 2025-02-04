@@ -149,17 +149,22 @@ class MyRobot(Robot):
 
         :return: True if the target zone or id is visible, False otherwise.
         """
+        cache_markers = []
         if type(target) is str:
             for marker in self.markers:
                 if marker.id in arena.map[target] and marker.id not in arena.excluded_pallets:
-                    self.target_id = marker.id
-                    return True
-            return False
+                    cache_markers.append(marker)
         else:
             for marker in self.markers:
                 if marker.id == target:
                     return True
             return False
+
+        if len(cache_markers) == 0:
+            return False
+        else:
+            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance)[0].id
+            return True
 
     def select_target_id(self) -> bool:
         """
@@ -423,7 +428,7 @@ while True:
                 case True if math.degrees(abs(robot.target_object.position.horizontal_angle)) > 1.5 and robot.target_object.position.distance > 350:
                     robot.turn(speed= 0.5 * DEFAULT_ROTATION, reverse=robot.target_object.position.horizontal_angle < 0)
                     robot.status = State.TRAVEL_3
-                case False if robot.front_ultrasound < arena.drop_distance(robot.target_id) or (robot.front_ultrasound == 0 and arena.drop_distance(robot.target_id) == 205) or (robot.front_ultrasound == 0 and robot.front_left_microswitch and robot.front_right_microswitch):
+                case False if ((robot.front_ultrasound != 0) and (robot.front_ultrasound < arena.drop_distance(robot.target_id))) or (robot.front_ultrasound == 0 and arena.drop_distance(robot.target_id) == 205) or ((robot.front_ultrasound == 0 or robot.target_id in arena.highrise_capacity) and (robot.front_left_microswitch or robot.front_right_microswitch)):
                     robot.brake()
                     robot.status = robot.fetch_next_state()
                     robot.sleep(0.5)
@@ -433,8 +438,9 @@ while True:
 
             print(robot.travel_distance, robot.perpendicular_distance, robot.target_object.position.distance, math.degrees(robot.real_yaw), robot.front_ultrasound)
         case State.PICKUP_1:
+            print("PICKUP_1", "FRONT ULTRASOUND", robot.front_ultrasound, "LEFT MICROSWITCH", robot.front_left_microswitch, "RIGHT MICROSWITCH", robot.front_right_microswitch)
             robot.update_ultrasound()
-            if robot.front_ultrasound < 50 or robot.front_left_microswitch or robot.front_right_microswitch:
+            if (robot.front_ultrasound != 0 and robot.front_ultrasound < 50) or robot.front_left_microswitch or robot.front_right_microswitch:
                 # broken? intended to detect if the pallet was actually successfully picked up
                 # robot.move(reverse = True)
                 robot.vacuum_control()
