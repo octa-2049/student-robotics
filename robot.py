@@ -323,7 +323,7 @@ while True:
     match robot.status:
         case State.INITIAL:
             robot.refresh_interval = 0.05
-            robot.turn(reverse = False if len(arena.excluded_pallets) < 5 and not (len(arena.excluded_pallets) == 0 and "highrise" in robot.target_zone) else True)
+            robot.turn(reverse = False if len(arena.excluded_pallets) < 5 and not ((len(arena.excluded_pallets) == 0 or len(arena.excluded_pallets) == 4) and "highrise" in robot.target_zone) else True)
             robot.activity_start_time = robot.time()
             robot.activity_stop_time = robot.activity_start_time + 11    # Activity time-out occurs after 11 seconds (when the robot has turned 360 degrees).
             robot.status = State.SEARCH_1
