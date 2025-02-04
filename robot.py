@@ -174,7 +174,9 @@ class MyRobot(Robot):
 
     def select_target_roll(self):
         """Selects the target roll (lowest absolute value of yaw relative to the camera) and sets it to self.target_roll."""
-        self.target_roll = round_90([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_90(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll) # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
+        self.target_roll = [round_90([marker for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_90(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id][0].orientation.roll)] # Stable sort. lambda marker: (marker.position.distance, abs(marker.orientation.yaw)
+        if abs(self.target_roll[0]) == 180:
+            self.target_roll = [-180, 180]
         print([(marker.id, marker.size, round_90(marker.orientation.roll), math.degrees(marker.orientation.roll), math.degrees(marker.orientation.yaw), math.degrees(marker.orientation.pitch)) for marker in sorted(self.markers, key = lambda marker: abs(marker.orientation.yaw) if abs(round_90(marker.orientation.roll)) != 90 else abs(marker.orientation.pitch)) if marker.id == self.target_id])
 
     def select_target_object(self) -> bool:
@@ -183,7 +185,7 @@ class MyRobot(Robot):
 
         :return: Whether the selected marker face is visible."""
         try:
-            self.target_object = [marker for marker in self.markers if marker.id == self.target_id and round_90(marker.orientation.roll) == self.target_roll][0]
+            self.target_object = [marker for marker in self.markers if marker.id == self.target_id and round_90(marker.orientation.roll) in self.target_roll][0]
             return True
         except:
             # self.target_object = None
@@ -193,7 +195,7 @@ class MyRobot(Robot):
         """Calculates the marker's yaw from the perspective of the camera."""
         roll_cache = round_90(self.target_object.orientation.roll)
         is_roll_negative = -1 if roll_cache < 0 or roll_cache == 180 else 1
-        if roll_cache == 0 or roll_cache == 180:
+        if roll_cache == 0 or roll_cache == 180 or roll_cache == -180:
             self.real_yaw = is_roll_negative * self.target_object.orientation.yaw
         else:
             self.real_yaw = is_roll_negative * self.target_object.orientation.pitch
@@ -259,7 +261,7 @@ class Arena:
             "highrise_targets": [199] # broken
         }
 
-        self.map["highrise_targets"].extend(self.map[robot.own_highrise]) # NOT APPEND - append gives [199, [195]] which won't work
+        self.map["highrise_targets"].extend(self.map[robot.own_highrise]) # NOT APPEND - append gives [199, [195]] which won't work # TODO retest
 
         self.highrise_capacity = {
             195: 2,
