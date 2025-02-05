@@ -352,41 +352,8 @@ while True:
                     print("REAL YAW", math.degrees(robot.real_yaw), "RAW_ROLL", math.degrees(robot.target_object.orientation.roll), "ROLL", round_90(robot.target_object.orientation.roll), "YAW", math.degrees(robot.target_object.orientation.yaw), "PITCH", math.degrees(robot.target_object.orientation.pitch), "HORIZONTAL ANGLE", math.degrees(robot.target_object.position.horizontal_angle))
                     robot.calculate_travel_distance()
                     robot.calculate_perpendicular_distance()
-                    print(robot.perpendicular_distance, math.degrees(robot.target_object.position.horizontal_angle))
+                    print(robot.perpendicular_distance, math.degrees(robot.real_yaw))
                     robot.reverse = robot.real_yaw < 0
-                    # TODO update boolean logic as may not work in some scenarios + infinite loop if marker starts too close
-                    # if abs(robot.perpendicular_distance) > 400 and not ((robot.perpendicular_distance < 0 and robot.travel_distance < 0) or (robot.perpendicular_distance > 0 and robot.travel_distance > 0)):
-                    #     robot.reverse = robot.travel_distance < 0
-                    #     robot.turn(reverse = robot.reverse)
-                    # elif 400 < abs(robot.perpendicular_distance):
-                    #     robot.brake()
-                    #     robot.status = State.TRAVEL_2
-                    #     robot.activity_start_time = robot.time()
-                    #     robot.move()
-                    #     robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
-                    #     print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
-                    #     print("travel time:", (robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
-                    # else:
-                    #     robot.reverse = robot.travel_distance > 0
-                    #     robot.turn(reverse = robot.reverse)
-                    #     # robot.reverse = robot.travel_distance < 0
-                    #     # robot.turn(reverse = robot.reverse)
-                    #     print("BACKUP TRAVEL_1")
-                    #     robot.sleep(1)
-                    #     robot.brake()
-                    #     robot.status = State.TRAVEL_2
-                    #     robot.activity_start_time = robot.time()
-                    #     robot.move()
-                    #     robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
-                    #     print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
-                    #     print("travel time:", (robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.015 * robot.wheel_radius))
-
-                    # if (robot.real_yaw < 0 and robot.perpendicular_distance < -400) or (robot.real_yaw > 0 and robot.perpendicular_distance < 400):
-                    #     robot.turn(reverse = True)
-                    # elif (robot.real_yaw > 0 and robot.perpendicular_distance > 400) or (robot.real_yaw < 0 and robot.perpendicular_distance > -400):
-                    #     robot.turn()
-                    # else:
-                    #     robot.brake()
 
                     if robot.real_yaw > 0 and robot.perpendicular_distance < 280:
                         robot.turn(reverse = True)
@@ -397,10 +364,9 @@ while True:
                         robot.status = State.TRAVEL_2
                         robot.move()
                         robot.activity_start_time = robot.time()
-                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.1 * robot.wheel_radius)) # TODO bug if changed to 1.1/1.2
+                        robot.activity_stop_time = robot.activity_start_time + abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.1 * robot.wheel_radius))
                         print("PERPENDICULAR DISTANCE", robot.perpendicular_distance, "TRAVEL DISTANCE", robot.travel_distance)
                         print("travel time:", abs((robot.travel_distance * 0.001) / (robot.default_speed * 25 * 1.1 * robot.wheel_radius)))
-
 
                 case False if robot.time() > robot.activity_stop_time:
                     pass
