@@ -170,9 +170,9 @@ class MyRobot(Robot):
         if len(cache_markers) == 0:
             return False
         else:
-            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance if abs(math.degrees(calculate_real_yaw_any(marker))) < 80 else float('inf'))[0].id
+            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance if abs(math.degrees(calculate_real_yaw_any(marker))) < 70 else float('inf'))[0].id
             print(self.target_id, abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))))
-            return abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))) < 80
+            return abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))) < 70
 
     def select_target_id(self) -> bool:
         """
@@ -322,7 +322,7 @@ while True:
     match robot.status:
         case State.INITIAL:
             robot.refresh_interval = 0.05
-            robot.turn(reverse = False if len(arena.excluded_pallets) < 5 and not ((len(arena.excluded_pallets) == 0 or len(arena.excluded_pallets) == 4) and "highrise" in robot.target_zone) else True)
+            robot.turn(reverse = False if len(arena.excluded_pallets) < 5 and not ((len(arena.excluded_pallets) == 0 or (len(arena.excluded_pallets) == 4 and (robot.target_id == 199 or robot.target_id not in arena.highrise_capacity))) and "highrise" in robot.target_zone) else True)
             robot.activity_start_time = robot.time()
             robot.activity_stop_time = robot.activity_start_time + 11    # Activity time-out occurs after 11 seconds (when the robot has turned 360 degrees).
             robot.status = State.SEARCH_1
@@ -399,7 +399,7 @@ while True:
                     pass
                 case False if robot.front_ultrasound < 205 and robot.front_ultrasound != 0:
                     robot.move(reverse = True)
-                    robot.sleep(0.2)
+                    robot.sleep(0.35)
                     robot.status = State.TRAVEL_2A
         case State.TRAVEL_4:
             robot.update_ultrasound()
@@ -423,11 +423,14 @@ while True:
             if (robot.front_ultrasound != 0 and robot.front_ultrasound < 50) or robot.front_left_microswitch or robot.front_right_microswitch:
                 # broken? intended to detect if the pallet was actually successfully picked up
                 # robot.move(reverse = True)
+                robot.turn(0.05, reverse = robot.reverse)
+                robot.sleep(0.0001)
+                robot.brake()
                 robot.vacuum_control()
                 robot.sleep(1.5)
                 # robot.status = State.TRAVEL_4 # causes infinite loop
             else:
-                robot.target_zone = robot.own_highrise if len(arena.excluded_pallets) != 3 else "highrise_center" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
+                robot.target_zone = robot.own_highrise if len(arena.excluded_pallets) != 3 else "highrise_targets" # slightly dodgy - for this to work get the nearest pallet to the center; also calculate how much time is left - go to own highrise if not enough time
                 robot.pallet_in_possession = robot.target_id
                 robot.status = State.INITIAL
                 robot.reverse = not robot.reverse if len(arena.excluded_pallets) != 0 else robot.reverse
@@ -444,10 +447,14 @@ while True:
                 # DEFAULT_ROTATION = -0.1
                 robot.turn(-0.1)
                 robot.sleep(0.5)
-            elif len(arena.excluded_pallets) == 4:
+            elif robot.target_id == 199: # center highrise
                 robot.sleep(1.5)
                 robot.turn(0.1)
                 robot.sleep(0.5)
+            elif len(arena.excluded_pallets) == 4:
+                robot.sleep(0.2)
+                robot.turn(-0.5)
+                robot.sleep(0.8)
             else:
                 robot.sleep(0.2)
 
