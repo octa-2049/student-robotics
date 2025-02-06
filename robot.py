@@ -93,6 +93,8 @@ class MyRobot(Robot):
         self.status = State.INITIAL
         self.activity_start_time = 0
 
+        self.flag = False
+
     def see(self, force_update: bool = False) -> bool:
         """
         Fetches and saves the marker ids currently in view, if more than self.refresh_interval seconds have passed since the last update.
@@ -170,9 +172,9 @@ class MyRobot(Robot):
         if len(cache_markers) == 0:
             return False
         else:
-            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance if abs(math.degrees(calculate_real_yaw_any(marker))) < 70 else float('inf'))[0].id
+            self.target_id = sorted(cache_markers, key = lambda marker: marker.position.distance if abs(math.degrees(calculate_real_yaw_any(marker))) < 80 else float('inf'))[0].id
             print(self.target_id, abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))))
-            return abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))) < 70
+            return abs(math.degrees(calculate_real_yaw_any(cache_markers[0]))) < 80
 
     def select_target_id(self) -> bool:
         """
@@ -448,6 +450,13 @@ while True:
                 robot.turn(-0.1)
                 robot.sleep(0.5)
             elif robot.target_id == 199: # center highrise
+                # robot.turn(0.2)
+                # robot.sleep(2)
+                # robot.turn(0.1)
+                # robot.sleep(0.5)
+                robot.turn(0.2)
+                robot.sleep(0.5)
+                robot.move(reverse=True)
                 robot.sleep(1.5)
                 robot.turn(0.1)
                 robot.sleep(0.5)
