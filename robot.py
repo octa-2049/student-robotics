@@ -17,5 +17,5 @@ while True:
         roll = mark.orientation.roll
         roll = myRobot.roundRollDeg(roll)
         print(mark.orientation.roll)
-        print((mark.orientation.yaw))
-        print((mark.orientation.pitch))
+        print(mark.orientation.yaw)
+        print(mark.orientation.pitch)
