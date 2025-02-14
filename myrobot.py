@@ -114,7 +114,12 @@ class MyRobot(Robot):
             return None
 
     def chooseRightSide(self, markers):
-        for mark in markers
+        bestSide = markers[0]
+        for mark in markers:
+            if self.getYawRad(bestSide) > self.getYawRad(mark):
+                bestSide = mark
+
+        return bestSide
 
     def lineUp(self, targetID):
         while not self.linedUp:
