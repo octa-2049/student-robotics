@@ -84,7 +84,7 @@ class MyRobot(Robot):
                 self.rightMotor.power = -speed
             self.stop()
 
-    def look(self, targetIDs = None, roll = None):
+    def look(self, targetIDs = None, targetRoll = None):
         targetInfos = []
         markers = None
         markers = self.camera.see()
@@ -97,17 +97,13 @@ class MyRobot(Robot):
                     targetInfos.append(mark)
                     self.targetFound = True
 
-        if len(targetInfos) > 1 and roll != None:
-            #finalMarker = targetInfos[0]
+        if len(targetInfos) > 1 and targetRoll != None:
             for marker in targetInfos:
                 accRoll = self.roundRollDeg(marker.orientation.roll)
-                if accRoll == roll:
+                if accRoll == targetRoll:
                     return marker
 
-
-
         elif targetInfos != []:
-
             return targetInfos
 
         else:
