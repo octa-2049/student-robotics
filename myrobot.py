@@ -108,7 +108,9 @@ class MyRobot(Robot):
         for marker in targetInfos:
             accRoll = self.roundRollDeg(marker.orientation.roll)
             if accRoll == targetRoll:
-                return marker
+                self.faceFound = True
+                return marker #Only one marker returned
+        return None
 
     def roundRollDeg(self, roll): #Check which orientation side is
         #Side either -180, 90, 0, 90, 180 degrees
