@@ -129,7 +129,7 @@ class MyRobot(Robot):
         else: #use pitch if box is on its "side"
             return is_roll_negative * markerInfo.orientation.pitch
 
-    def chooseBestSide(self, markers):
+    def chooseBestFace(self, markers):
         #based on which side closest to being square on
         bestSide = markers[0]
         for mark in markers:
