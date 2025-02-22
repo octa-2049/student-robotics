@@ -96,6 +96,10 @@ class MyRobot(Robot):
                 if mark.id in targetIDs:
                     targetInfos.append(mark)
                     self.targetFound = True
+        if targetInfos == []:
+            return None
+        else:
+            return targetInfos
 
     def findFace(self, targetId, targetRoll):
         #To check if correct face side is seen (using roll)
