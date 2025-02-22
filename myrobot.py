@@ -141,10 +141,11 @@ class MyRobot(Robot):
 
         return bestSide
 
-    def lineUp(self, targetID):
+    def lineUp(self, targetID, targetRoll):
+        #Lines up on specific face, continuous loop until lined up or marker goes out of vision
         while not self.linedUp:
-            markerInfo = self.look(targetID)
-            if self.targetFound:
+            markerInfo = self.findFace(targetID, targetRoll)
+            if markerInfo != None:
                 angleOut = markerInfo.position.horizontal_angle
                 if -0.05 < angleOut < 0.05:
                     self.linedUp = True
@@ -156,8 +157,12 @@ class MyRobot(Robot):
                     else:
                         self.turn(self.SPEED, angleOut)
             else:
-                self.turn(0.2)
-                self.look(targetID)
+                self.linedUp = False
+                return None
+
+
+
+
 
     def roundRollDeg(self, roll):
         rollDeg = math.degrees(roll)
