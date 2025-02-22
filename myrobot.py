@@ -90,8 +90,8 @@ class MyRobot(Robot):
         markers = self.camera.see()
         self.targetFound = False
         if markers != None:
-            if targetIDs == None:
-                return markers
+            if targetIDs == None: #If no target but just want to
+                return markers    #see if any markers visible
             for mark in markers:
                 if mark.id in targetIDs:
                     targetInfos.append(mark)
