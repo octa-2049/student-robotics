@@ -15,9 +15,9 @@ class MyRobot(Robot):
         self.rightMotor = self.motor_boards[self.MOTOR1].motors[1]
 
         localMarkerIDs = [[i for i in range(100, 120)],
-                          [i for i in range(100, 120)],
-                          [i for i in range(100, 120)],
-                          [i for i in range(100, 120)]]
+                          [i for i in range(120, 140)],
+                          [i for i in range(140, 160)],
+                          [i for i in range(160, 180)]]
         self.palletIDs = localMarkerIDs[self.zone]
         self.outerHighriseIDs = [i for i in range(195, 198)]
         self.innerHighriseID = [199]
