@@ -106,8 +106,17 @@ class MyRobot(Robot):
         elif targetInfos != []:
             return targetInfos
 
-        else:
-            return None
+    def getYawRad(self, markerInfo):
+        #Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
+        roll_cache = self.roundRollDeg(markerInfo.orientation.roll)
+        if roll_cache < 0 or roll_cache == 180:
+            is_roll_negative = -1
+        else: #If yaw/pitch are switched
+            is_roll_negative = 1
+        if roll_cache == 0 or roll_cache == 180: #use yaw if "right" way up
+            return is_roll_negative * markerInfo.orientation.yaw
+        else: #use pitch if box is on its "side"
+            return is_roll_negative * markerInfo.orientation.pitch
 
     def chooseRightSide(self, markers):
         bestSide = markers[0]
