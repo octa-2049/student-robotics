@@ -85,7 +85,7 @@ class MyRobot(Robot):
             self.stop()
 
     def look(self, targetIDs = None, targetRoll = None):
-        targetInfos = []
+        targetInfos = [] #Multiple faces of same target stored here
         markers = None
         markers = self.camera.see()
         self.targetFound = False
