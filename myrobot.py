@@ -103,8 +103,13 @@ class MyRobot(Robot):
                 if accRoll == targetRoll:
                     return marker
 
-        elif targetInfos != []:
-            return targetInfos
+    def roundRollDeg(self, roll): #Check which orientation side is
+        #Side either -180, 90, 0, 90, 180 degrees
+        rollDeg = math.degrees(roll)
+        rollDeg = int(90 * round(float(roll) / 90))
+        if rollDeg == -180:
+            rollDeg = 180
+        return rollDeg
 
     def getYawRad(self, markerInfo):
         #Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
