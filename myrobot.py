@@ -97,11 +97,13 @@ class MyRobot(Robot):
                     targetInfos.append(mark)
                     self.targetFound = True
 
-        if len(targetInfos) > 1 and targetRoll != None:
-            for marker in targetInfos:
-                accRoll = self.roundRollDeg(marker.orientation.roll)
-                if accRoll == targetRoll:
-                    return marker
+    def findFace(self, targetId, targetRoll):
+        #To check if correct face side is seen (using roll)
+        targetInfos = self.look(targetId)
+        for marker in targetInfos:
+            accRoll = self.roundRollDeg(marker.orientation.roll)
+            if accRoll == targetRoll:
+                return marker
 
     def roundRollDeg(self, roll): #Check which orientation side is
         #Side either -180, 90, 0, 90, 180 degrees
