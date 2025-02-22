@@ -84,7 +84,7 @@ class MyRobot(Robot):
                 self.rightMotor.power = -speed
             self.stop()
 
-    def look(self, targetIDs = None, targetRoll = None):
+    def look(self, targetIDs = None):
         targetInfos = [] #Multiple faces of same target stored here
         markers = None
         markers = self.camera.see()
