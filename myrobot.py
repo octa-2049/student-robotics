@@ -6,11 +6,12 @@ class MyRobot(Robot):
         super().__init__()
 
         self.SPEED = 0.2
-        self.DIAMETER = 90
-        self.WIDTH = 397
-        self.MOTOR1 = "MOT"#"SR0REB"
+        self.DIAMETER = 90 #Diameter of wheel
+        self.WIDTH = 397 #Length of robot from wheel to wheel
+        self.MOTOR1 = "SR0REB"
 
         #Variables
+        
         self.leftMotor = self.motor_boards[self.MOTOR1].motors[0]
         self.rightMotor = self.motor_boards[self.MOTOR1].motors[1]
 
@@ -22,16 +23,21 @@ class MyRobot(Robot):
         self.outerHighriseIDs = [i for i in range(195, 198)]
         self.innerHighriseID = [199]
 
+        #self.targetInfos = [] #All faces of id marker
+        self.targetFace = [] #Specific face of certain marker
+        self.targetRoll = None  # Will be -90, 0, 90 or 180 degrees
+
         #Booleans
+        self.hasTarget = False
         self.isTargetBox = True #start by looking for box
         self.targetFound = False
+        self.faceFound = False
         self.reachedTarget = False
         self.linedUp = False
         self.isTurning = False
         self.isMoving = False
         self.scissorLiftUp = False
         self.grabbed = False
-
 
     def stop(self):
         self.leftMotor.power = 0
@@ -119,6 +125,9 @@ class MyRobot(Robot):
             rollDeg = 180
         return rollDeg
 
+    def getRoll(self, marker):
+        return self.roundRollDeg(marker.orientation.roll)
+
     def getYawRad(self, markerInfo):
         #Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
         roll_cache = self.roundRollDeg(markerInfo.orientation.roll)
@@ -159,32 +168,24 @@ class MyRobot(Robot):
                 self.linedUp = False
                 return None
 
+    def findBestMarker(self, targetIDs):
+        while self.targetFace == []:
+            markers = self.look()
+            if markers == None:
+                self.turn(0.2)
+            else:
+                self.stop()
+                bestMarker = markers[0]
+                for marker in markers:
+                    if bestMarker.position.distance > marker.position.distance
 
 
-
-
-    def roundRollDeg(self, roll):
-        rollDeg = math.degrees(roll)
-        rollDeg = int(90 * round(float(roll) / 90))
-        if rollDeg == -180:
-            rollDeg = 180
-        return rollDeg
-
-    def getYawRad(self, markerInfo):
-        roll_cache = self.roundRollDeg(markerInfo.orientation.roll)
-        if roll_cache < 0 or roll_cache == 180:
-            is_roll_negative = -1
-        else:
-            is_roll_negative = 1
-        if roll_cache == 0 or roll_cache == 180: # or roll_cache == -180:
-            return is_roll_negative * markerInfo.orientation.yaw
-        else:
-            return is_roll_negative * markerInfo.orientation.pitch
 
     def goToBoxLong(self, targetID):
         speed = 0.2
         targetReached = False
         markerInfo = None
+        targetRoll = None
         while not targetReached:
             if markerInfo == None:
                 markerInfo = self.lineUp(targetID)
@@ -202,8 +203,8 @@ class MyRobot(Robot):
                 self.move(self.SPEED, distanceTowards)
                 targetReached = True
 
-    def goToBoxShort(self, markerID):
-
+    def goToBoxShort(self, targetInfo):
+        markerID = targetInfo.id
         targetReached = False
         markerInfo = None
         while not targetReached:
