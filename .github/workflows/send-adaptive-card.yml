@@ -1,0 +1,125 @@
+name: Send Adaptive Card to Webhook
+
+on:
+  push:
+
+jobs:
+  send-adaptive-card:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Get current date and time
+        id: current_time
+        run: echo "CURRENT_TIME=$(date -u '+%M:%S, %d/%m/%Y')" >> $GITHUB_ENV
+
+      - name: Send Adaptive Card to Webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          REPO_NAME: ${{ github.repository }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+          CURRENT_TIME: ${{ env.CURRENT_TIME }}
+        run: |
+          FULL_NAME="${REPO_NAME}/${BRANCH_NAME}"
+          COMMIT_TITLE=$(git log -1 --pretty=format:%s)
+          COMMIT_DESCRIPTION=$(git log -1 --pretty=format:%b)
+          
+          ADAPTIVE_CARD_JSON=$(cat <<EOF
+          {
+          "type": "AdaptiveCard",
+          "body": [
+              {
+                  "type": "TextBlock",
+                  "size": "Medium",
+                  "weight": "Bolder",
+                  "text": "GitHub | Attention Required"
+              },
+              {
+                  "type": "ColumnSet",
+                  "columns": [
+                      {
+                          "type": "Column",
+                          "items": [
+                              {
+                                  "type": "Image",
+                                  "style": "Person",
+                                  "url": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
+                                  "size": "Small"
+                              }
+                          ],
+                          "width": "auto"
+                      },
+                      {
+                          "type": "Column",
+                          "items": [
+                              {
+                                  "type": "TextBlock",
+                                  "weight": "Bolder",
+                                  "text": "Workflows",
+                                  "wrap": true
+                              },
+                              {
+                                  "type": "TextBlock",
+                                  "spacing": "None",
+                                  "text": "Sent $CURRENT_TIME",
+                                  "isSubtle": true,
+                                  "wrap": true
+                              }
+                          ],
+                          "width": "stretch"
+                      }
+                  ]
+              },
+              {
+                  "type": "TextBlock",
+                  "text": "A new commit was made to **$FULL_NAME**.",
+                  "wrap": true
+              },
+              {
+                  "type": "FactSet",
+                  "facts": [
+                      {
+                          "title": "Committer:",
+                          "value": "${{ github.actor }}"
+                      },
+                      {
+                          "title": "Title:",
+                          "value": "$COMMIT_TITLE"
+                      },
+                      {
+                          "title": "Description:",
+                          "value": "$COMMIT_DESCRIPTION"
+                      }
+                  ]
+              },
+              {
+                  "type": "ActionSet",
+                  "actions": [
+                      {
+                          "type": "Action.OpenUrl",
+                          "title": "View commit",
+                          "url": "${{ github.event.head_commit.url }}"
+                      }
+                  ]
+              },
+              {
+                  "type": "TextBlock",
+                  "text": "Please note: this is an automated message.",
+                  "wrap": true,
+                  "isSubtle": false,
+                  "size": "Small"
+              }
+          ],
+          "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
+          "version": "1.5"
+          }
+          EOF
+          )
+
+          curl -X POST -H "Content-Type: application/json" -d "$ADAPTIVE_CARD_JSON" $WEBHOOK_URL
