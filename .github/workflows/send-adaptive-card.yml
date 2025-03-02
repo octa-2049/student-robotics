@@ -2,8 +2,6 @@ name: Send Message Card to Webhook
 
 on:
   push:
-    branches:
-      - '*'
 
 jobs:
   send-message-card:
