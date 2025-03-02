@@ -1,10 +1,10 @@
-name: Send Adaptive Card to Webhook
+name: Send Message Card to Webhook
 
 on:
   push:
 
 jobs:
-  send-adaptive-card:
+  send-message-card:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
         id: current_time
         run: echo "CURRENT_TIME=$(date -u '+%M:%S, %d/%m/%Y')" >> $GITHUB_ENV
 
-      - name: Send Adaptive Card to Webhook
+      - name: Send Message Card to Webhook
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           REPO_NAME: ${{ github.repository }}
@@ -30,113 +30,50 @@ jobs:
           COMMIT_TITLE=$(git log -1 --pretty=format:%s)
           COMMIT_DESCRIPTION=$(git log -1 --pretty=format:%b)
           if [ -z "$COMMIT_DESCRIPTION" ]; then
-            COMMIT_DESCRIPTION="N/A."
+            COMMIT_DESCRIPTION="N/A"
           fi
 
-          ADAPTIVE_CARD_JSON=$(cat <<EOF
+          MESSAGE_CARD_JSON=$(cat <<EOF
           {
-             "type":"message",
-             "attachments":[
-                {
-                   "contentType":"application/vnd.microsoft.card.adaptive",
-                   "contentUrl":null,
-                   "content":{
-                      "\$schema":"http://adaptivecards.io/schemas/adaptive-card.json",
-                      "type":"AdaptiveCard",
-                      "version":"1.2",
-                      "body":[
-                        {
-                          "type": "TextBlock",
-                          "size": "Medium",
-                          "weight": "Bolder",
-                          "text": "GitHub | Attention Required"
-                        },
-                        {
-                          "type": "ColumnSet",
-                          "columns": [
-                            {
-                              "type": "Column",
-                              "items": [
-                                {
-                                  "type": "Image",
-                                  "style": "Person",
-                                  "url": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
-                                  "size": "Small"
-                                }
-                              ],
-                              "width": "auto"
-                            },
-                            {
-                              "type": "Column",
-                              "items": [
-                                {
-                                  "type": "TextBlock",
-                                  "weight": "Bolder",
-                                  "text": "Workflows",
-                                  "wrap": true
-                                },
-                                {
-                                  "type": "TextBlock",
-                                  "spacing": "None",
-                                  "text": "Sent $CURRENT_TIME",
-                                  "isSubtle": true,
-                                  "wrap": true
-                                }
-                              ],
-                              "width": "stretch"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "TextBlock",
-                          "text": "A new commit was made to **$FULL_NAME**.",
-                          "wrap": true
-                        },
-                        {
-                          "type": "FactSet",
-                          "facts": [
-                            {
-                              "title": "Committer:",
-                              "value": "${{ github.actor }}"
-                            },
-                            {
-                              "title": "Title:",
-                              "value": "$COMMIT_TITLE"
-                            },
-                            {
-                              "title": "Description:",
-                              "value": "$COMMIT_DESCRIPTION"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "ActionSet",
-                          "actions": [
-                            {
-                              "type": "Action.OpenUrl",
-                              "title": "View commit",
-                              "url": "${{ github.event.head_commit.url }}"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "TextBlock",
-                          "text": "Please note: this is an automated message.",
-                          "wrap": true,
-                          "isSubtle": false,
-                          "size": "Small"
-                        },
-                        {
-                          "type": "TextBlock",
-                          "text": "<at>here</at>",
-                          "wrap": true
-                        }
-                      ]
-                   }
-                }
-             ]
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "summary": "GitHub | Attention Required",
+            "themeColor": "0076D7",
+            "sections": [
+              {
+                "activityTitle": "GitHub | Attention Required",
+                "activityImage": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
+                "facts": [
+                  {
+                    "name": "Committer:",
+                    "value": "${{ github.actor }}"
+                  },
+                  {
+                    "name": "Title:",
+                    "value": "$COMMIT_TITLE"
+                  },
+                  {
+                    "name": "Description:",
+                    "value": "$COMMIT_DESCRIPTION"
+                  }
+                ],
+                "text": "A new commit was made to **$FULL_NAME**."
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "View commit",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.event.head_commit.url }}"
+                  }
+                ]
+              }
+            ],
           }
           EOF
           )
 
-          curl -X POST -H "Content-Type: application/json" -d "$ADAPTIVE_CARD_JSON" $WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d "$MESSAGE_CARD_JSON" $WEBHOOK_URL
