@@ -39,13 +39,8 @@ jobs:
             "sections": [
               {
                 "activityTitle": "GitHub | Attention Required",
-                "activitySubtitle": "Sent $CURRENT_TIME",
                 "activityImage": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
                 "facts": [
-                  {
-                    "name": "Repository:",
-                    "value": "$FULL_NAME"
-                  },
                   {
                     "name": "Committer:",
                     "value": "${{ github.actor }}"
@@ -74,7 +69,6 @@ jobs:
                 ]
               }
             ],
-            "text": "Please note: this is an automated message."
           }
           EOF
           )
