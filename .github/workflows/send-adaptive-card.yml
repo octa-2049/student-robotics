@@ -35,97 +35,106 @@ jobs:
 
           ADAPTIVE_CARD_JSON=$(cat <<EOF
           {
-            "type": "AdaptiveCard",
-            "body": [
-              {
-                "type": "TextBlock",
-                "size": "Medium",
-                "weight": "Bolder",
-                "text": "GitHub | Attention Required"
-              },
-              {
-                "type": "ColumnSet",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "items": [
-                      {
-                        "type": "Image",
-                        "style": "Person",
-                        "url": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
-                        "size": "Small"
-                      }
-                    ],
-                    "width": "auto"
-                  },
-                  {
-                    "type": "Column",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "weight": "Bolder",
-                        "text": "Workflows",
-                        "wrap": true
-                      },
-                      {
-                        "type": "TextBlock",
-                        "spacing": "None",
-                        "text": "Sent $CURRENT_TIME",
-                        "isSubtle": true,
-                        "wrap": true
-                      }
-                    ],
-                    "width": "stretch"
-                  }
-                ]
-              },
-              {
-                "type": "TextBlock",
-                "text": "A new commit was made to **$FULL_NAME**.",
-                "wrap": true
-              },
-              {
-                "type": "FactSet",
-                "facts": [
-                  {
-                    "title": "Committer:",
-                    "value": "${{ github.actor }}"
-                  },
-                  {
-                    "title": "Title:",
-                    "value": "$COMMIT_TITLE"
-                  },
-                  {
-                    "title": "Description:",
-                    "value": "$COMMIT_DESCRIPTION"
-                  }
-                ]
-              },
-              {
-                "type": "ActionSet",
-                "actions": [
-                  {
-                    "type": "Action.OpenUrl",
-                    "title": "View commit",
-                    "url": "${{ github.event.head_commit.url }}"
-                  }
-                ]
-              },
-              {
-                "type": "TextBlock",
-                "text": "Please note: this is an automated message.",
-                "wrap": true,
-                "isSubtle": false,
-                "size": "Small"
-              },
-              {
-                "type": "TextBlock",
-                "text": "<at>here</at>",
-                "wrap": true
-              }
-            ],
-            "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5"
+             "type":"message",
+             "attachments":[
+                {
+                   "contentType":"application/vnd.microsoft.card.adaptive",
+                   "contentUrl":null,
+                   "content":{
+                      "\$schema":"http://adaptivecards.io/schemas/adaptive-card.json",
+                      "type":"AdaptiveCard",
+                      "version":"1.2",
+                      "body":[
+                        {
+                          "type": "TextBlock",
+                          "size": "Medium",
+                          "weight": "Bolder",
+                          "text": "GitHub | Attention Required"
+                        },
+                        {
+                          "type": "ColumnSet",
+                          "columns": [
+                            {
+                              "type": "Column",
+                              "items": [
+                                {
+                                  "type": "Image",
+                                  "style": "Person",
+                                  "url": "https://statics.teams.cdn.office.net/evergreen-assets/apps/c3a1996d-db0f-4857-a6ea-7aabf0266b00_largeImage.png?v=1.1.1",
+                                  "size": "Small"
+                                }
+                              ],
+                              "width": "auto"
+                            },
+                            {
+                              "type": "Column",
+                              "items": [
+                                {
+                                  "type": "TextBlock",
+                                  "weight": "Bolder",
+                                  "text": "Workflows",
+                                  "wrap": true
+                                },
+                                {
+                                  "type": "TextBlock",
+                                  "spacing": "None",
+                                  "text": "Sent $CURRENT_TIME",
+                                  "isSubtle": true,
+                                  "wrap": true
+                                }
+                              ],
+                              "width": "stretch"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": "A new commit was made to **$FULL_NAME**.",
+                          "wrap": true
+                        },
+                        {
+                          "type": "FactSet",
+                          "facts": [
+                            {
+                              "title": "Committer:",
+                              "value": "${{ github.actor }}"
+                            },
+                            {
+                              "title": "Title:",
+                              "value": "$COMMIT_TITLE"
+                            },
+                            {
+                              "title": "Description:",
+                              "value": "$COMMIT_DESCRIPTION"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ActionSet",
+                          "actions": [
+                            {
+                              "type": "Action.OpenUrl",
+                              "title": "View commit",
+                              "url": "${{ github.event.head_commit.url }}"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": "Please note: this is an automated message.",
+                          "wrap": true,
+                          "isSubtle": false,
+                          "size": "Small"
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": "<at>here</at>",
+                          "wrap": true
+                        }
+                      ]
+                   }
+                }
+             ]
           }
           EOF
           )
