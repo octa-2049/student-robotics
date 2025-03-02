@@ -30,7 +30,7 @@ jobs:
           COMMIT_TITLE=$(git log -1 --pretty=format:%s)
           COMMIT_DESCRIPTION=$(git log -1 --pretty=format:%b)
           if [ -z "$COMMIT_DESCRIPTION" ]; then
-            COMMIT_DESCRIPTION="N/A."
+            COMMIT_DESCRIPTION="N/A"
           fi
 
           MESSAGE_CARD_JSON=$(cat <<EOF
