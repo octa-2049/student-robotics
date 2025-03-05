@@ -46,14 +46,14 @@ class MyRobot(Robot):
         self.isTurning = False
 
     def move(self, speed, distance = None):
-        if distance == None:
+        if distance == None: #if no distance to move is provided move until stopped
             self.leftMotor.power = speed
             self.rightMotor.power = speed
             self.isMoving = True
         else:
             distanceMoved = 0
-            startLeftPos = float(self.arduino.command("n"))
-            startRightPos = float(self.arduino.command("y"))
+            startLeftPos = float(self.arduino.command("n")) #arbitrary value to move left wheel motor
+            startRightPos = float(self.arduino.command("y")) #arbitrary value to move right wheel motor
             while distanceMoved <= distance:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
