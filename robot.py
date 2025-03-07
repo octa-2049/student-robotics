@@ -18,6 +18,13 @@ def strat1(myRobot):
             myRobot.goToBoxShort()
 
 
+def extra():
+    global ARDUINO_SN
+    while True:
+        robot.raw_serial_devices[ARDUINO_SN].write(b"0")
+        robot.sleep(1)
+        robot.raw_serial_devices[ARDUINO_SN].write(b"150")
+        robot.sleep(1)
 
 def test(myRobot):
     myRobot.goToBoxShort(100)
