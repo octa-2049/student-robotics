@@ -177,11 +177,13 @@ class MyRobot(Robot):
                 self.stop()
                 bestMarker = markers[0]
                 for marker in markers:
-                    if bestMarker.position.distance > marker.position.distance
+                    if bestMarker.position.distance > marker.position.distance:
+                        bestMarker = marker
 
-
+                return bestMarker
 
     def goToBoxLong(self, targetID):
+        #targetID = targetInfo.id
         speed = 0.2
         targetReached = False
         markerInfo = None
@@ -204,7 +206,8 @@ class MyRobot(Robot):
                 targetReached = True
 
     def goToBoxShort(self, targetInfo):
-        markerID = targetInfo.id
+        markerID = targetInfo #.id
+        roll = self.getRoll(targetInfo)
         targetReached = False
         markerInfo = None
         while not targetReached:

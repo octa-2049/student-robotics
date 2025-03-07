@@ -1,10 +1,8 @@
-import math
-
 from myrobot import MyRobot
+robot = MyRobot()
 
-SPEED = 0.2
+ARDUINO_SN = ""
 
-roboxer = MyRobot()
 
 def test(myRobot):
     while True:
@@ -19,8 +17,7 @@ def compCode(myRobot): #Code for actual robot
             myRobot.lineUp(myRobot.targetFace.id, myRobot.getRoll(myRobot.targetFace))
 
         elif not myRobot.reachedTarget:
-            myRobot.goToBoxShort()
-
+            myRobot.goToBoxShort(myRobot.targetFace)
 
 def extra():
     global ARDUINO_SN
@@ -30,22 +27,5 @@ def extra():
         robot.raw_serial_devices[ARDUINO_SN].write(b"150")
         robot.sleep(1)
 
-def test(myRobot):
-    myRobot.goToBoxShort(100)
-    # while True:
-    #     # myRobot.turn(0.2)
-    #     # myRobot.targetIDs = myRobot.palletIDs
-    #     # myRobot.look(80)
-    #     # print(myRobot.markerInfo)
-    #     #myRobot.goToBoxLong(80)
-    #     mark = (myRobot.look(myRobot.palletIDs))
-    #     if mark != None:
-    #         print(mark.id)
-    #         roll = mark.orientation.roll
-    #         roll = myRobot.roundRollDeg(roll)
-    #         print(mark.orientation.roll)
-    #         print(mark.orientation.yaw)
-    #         print(mark.orientation.pitch)
-
-#strat1(roboxer)
-test(roboxer)
+test(robot)
+compCode(robot)
