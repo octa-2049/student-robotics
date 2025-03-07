@@ -6,7 +6,11 @@ SPEED = 0.2
 
 roboxer = MyRobot()
 
-def strat1(myRobot):
+def test(myRobot):
+    while True:
+        myRobot.goToBoxShort(100)
+
+def compCode(myRobot): #Code for actual robot
     while True:
         if myRobot.targetFace != []:
             myRobot.findBestMarker()
