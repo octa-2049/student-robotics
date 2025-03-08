@@ -8,7 +8,8 @@ class MyRobot(Robot):
         self.SPEED = 0.2
         self.DIAMETER = 90 #Diameter of wheel
         self.WIDTH = 397 #Length of robot from wheel to wheel
-        self.MOTOR1 = "SR0REB"
+        self.MOTOR1 = "SR0REB" #For wheels
+        self.MOTOR2 = "" #For scissor lift
 
         #Variables
         
@@ -58,7 +59,7 @@ class MyRobot(Robot):
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
-                rightDiff = abs(startLeftPos - currentRightPos)
+                rightDiff = abs(startRightPos - currentRightPos)
                 leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
                 distanceMoved = avgDiff * self.DIAMETER * math.pi
@@ -67,7 +68,7 @@ class MyRobot(Robot):
                 self.rightMotor.power = speed
             self.stop()
 
-    def turn(self, speed: float, angle = None):
+    def turn(self, speed = 0.2, angle = None):
         #When speed positive robot turns clockwise
         if angle == None:
             self.leftMotor.power = speed
@@ -79,21 +80,21 @@ class MyRobot(Robot):
             angleTurned = 0
             startLeftPos = float(self.arduino.command("n"))
             startRightPos = float(self.arduino.command("y"))
-            while angleTurned <= angle:
+            while angleTurned <= angleToTurn:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
-                rightDiff = abs(startLeftPos - currentRightPos)
+                rightDiff = abs(startRightPos - currentRightPos)
                 leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
-                currentAngle = (avgDiff * 2 * math.pi)
+                angleTurned = (avgDiff * 2 * math.pi)
                 self.leftMotor.power = speed
                 self.rightMotor.power = -speed
             self.stop()
 
     def look(self, targetIDs = None):
         targetInfos = [] #Multiple faces of same target stored here
-        markers = None
+        #markers = None
         markers = self.camera.see()
         self.targetFound = False
         if markers != None:
@@ -121,7 +122,7 @@ class MyRobot(Robot):
     def roundRollDeg(self, roll): #Check which orientation side is
         #Side either -180, 90, 0, 90, 180 degrees
         rollDeg = math.degrees(roll)
-        rollDeg = int(90 * round(float(roll) / 90))
+        rollDeg = int(90 * round(float(rollDeg) / 90))
         if rollDeg == -180:
             rollDeg = 180
         return rollDeg
@@ -150,6 +151,13 @@ class MyRobot(Robot):
         #unfinished
         return bestSide
 
+    def chooseBestMarker(self, markers):
+        bestMarker = markers[0]
+        for marker in markers:
+            if bestMarker.position.distance > marker.position.distance:
+                bestMarker = marker
+        return bestMarker
+
     def lineUp(self, targetID, targetRoll):
         #Lines up on specific face, continuous loop until lined up or marker goes out of vision
         while not self.linedUp:
@@ -169,30 +177,33 @@ class MyRobot(Robot):
                 self.linedUp = False
                 return None
 
-    def findBestMarker(self, targetIDs):
+    def findBestMarker(self):
+        #Finds next marker to go towards (either box or high rise)
+        if self.isTargetBox:  # To choose whether target box or high rise
+            targetIDs = self.palletIDs
+        else:
+            targetIDs = self.outerHighriseIDs
         while self.targetFace == []:
-            markers = self.look()
+            markers = self.look(targetIDs)
             if markers == None:
-                self.turn(0.2)
+                self.turn(self.SPEED) #NEED WAY TO EXIT IF NO MARKER FOUND
             else:
                 self.stop()
-                bestMarker = markers[0]
-                for marker in markers:
-                    if bestMarker.position.distance > marker.position.distance:
-                        bestMarker = marker
+                self.targetFace = self.chooseBestMarker(markers)
+                self.hasTarget = True
+        #return self.targetFace
 
-                return bestMarker
 
-    def goToBoxLong(self, markerInfo):
-        targetID = markerInfo.id
-        targetRoll = self.getRoll(markerInfo)
+    def goToBoxLong(self, targetInfo):
+        targetID = targetInfo.id
+        targetRoll = self.getRoll(targetInfo)
         speed = 0.2
         targetReached = False
         self.linedUp = False
         while not targetReached:
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo == None: #If face not seen, turns on the spot
-                self.turn(0.2) #NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+                self.turn(self.SPEED) #NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
             else:
                 self.stop()
                 if self.linedUp:
@@ -213,13 +224,14 @@ class MyRobot(Robot):
                     markerInfo = self.lineUp(targetID, targetRoll)
 
     def goToBoxShort(self, targetInfo):
-        markerID = targetInfo #.id
+        markerID = targetInfo.id
         roll = self.getRoll(targetInfo)
         targetReached = False
-        markerInfo = self.findFace(markerID, roll)
         while not targetReached:
+            markerInfo = self.findFace(markerID, roll)
             if markerInfo == None:
-                markerInfo = self.lineUp(markerID)
+                self.turn(self.SPEED) #NEEDS WAY TO EXIT IF NOT FOUND
+                #markerInfo = self.lineUp(markerID)
             else:
                 distance = markerInfo.position.distance
                 self.move(0.2, distance-25)

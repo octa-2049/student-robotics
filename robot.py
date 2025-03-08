@@ -6,13 +6,14 @@ ARDUINO_SN = ""
 
 def test(myRobot):
     while True:
-        myRobot.goToBoxShort(100)
+        markers = myRobot.look()
+        bestMarker = myRobot.chooseBestFace(markers)
+        myRobot.goToBoxShort(bestMarker)
 
 def compCode(myRobot): #Code for actual robot
     while True:
-        if myRobot.targetFace != []:
+        if myRobot.targetFace == []:
             myRobot.findBestMarker()
-
         elif not myRobot.linedUp:
             myRobot.lineUp(myRobot.targetFace.id, myRobot.getRoll(myRobot.targetFace))
 
