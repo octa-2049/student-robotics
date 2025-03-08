@@ -68,6 +68,7 @@ class MyRobot(Robot):
             self.stop()
 
     def turn(self, speed: float, angle = None):
+        #When speed positive robot turns clockwise
         if angle == None:
             self.leftMotor.power = speed
             self.rightMotor.power = -speed
@@ -182,34 +183,40 @@ class MyRobot(Robot):
 
                 return bestMarker
 
-    def goToBoxLong(self, targetID):
-        #targetID = targetInfo.id
+    def goToBoxLong(self, markerInfo):
+        targetID = markerInfo.id
+        targetRoll = self.getRoll(markerInfo)
         speed = 0.2
         targetReached = False
-        markerInfo = None
-        targetRoll = None
+        self.linedUp = False
         while not targetReached:
-            if markerInfo == None:
-                markerInfo = self.lineUp(targetID)
+            markerInfo = self.findFace(targetID, targetRoll)
+            if markerInfo == None: #If face not seen, turns on the spot
+                self.turn(0.2) #NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
             else:
-                yaw = self.getYawRad(markerInfo)
-                if yaw < 0:
-                    speed = -speed
-                    yaw = abs(yaw)
-                distance = markerInfo.orientation.yaw
-                distanceAway = math.cos(yaw) * distance
-                distanceTowards = math.sin(yaw) * distance
-                self.turn(speed, yaw)
-                self.move(speed, distanceAway)
-                self.turn(speed, math.pi/2)
-                self.move(self.SPEED, distanceTowards)
-                targetReached = True
+                self.stop()
+                if self.linedUp:
+                    yaw = self.getYawRad(markerInfo)
+                    if yaw < 0:
+                        speed = -speed
+                        yaw = abs(yaw)
+                    distance = markerInfo.orientation.yaw
+                    distanceAway = math.cos(yaw) * distance
+                    distanceTowards = math.sin(yaw) * distance
+                    self.turn(speed, yaw)
+                    speed = abs(speed) #To make sure robot goes forward/turns 90 degrees clockwise
+                    self.move(speed, distanceAway)
+                    self.turn(speed, math.pi/2)
+                    self.move(self.SPEED, distanceTowards)
+                    targetReached = True
+                else:
+                    markerInfo = self.lineUp(targetID, targetRoll)
 
     def goToBoxShort(self, targetInfo):
         markerID = targetInfo #.id
         roll = self.getRoll(targetInfo)
         targetReached = False
-        markerInfo = None
+        markerInfo = self.findFace(markerID, roll)
         while not targetReached:
             if markerInfo == None:
                 markerInfo = self.lineUp(markerID)
