@@ -32,6 +32,27 @@ class MyRobot(Robot):
         self.hasTarget = False
         self.isTargetBox = True #start by looking for box
         self.targetFound = False
+        self.targetLost = False #When looking for target after certain time/turning 360 degrees
+                                #Exit loop and switch targetLost to true to go back to
+                                #Main code and find new target
+        self.faceFound = False
+        self.reachedTarget = False
+        self.linedUp = False
+        self.isTurning = False
+        self.isMoving = False
+        self.scissorLiftUp = False
+        self.grabbed = False
+
+    def resetVariables(self):
+        #Once box deposited, reset so that it restarts
+        self.targetFace = [] #Specific face of certain marker
+        self.targetRoll = None  # Will be -90, 0, 90 or 180 degrees
+
+        #Booleans
+        self.hasTarget = False
+        self.isTargetBox = True #start by looking for box
+        self.targetFound = False
+        self.targetLost = False
         self.faceFound = False
         self.reachedTarget = False
         self.linedUp = False
@@ -160,6 +181,7 @@ class MyRobot(Robot):
 
     def lineUp(self, targetID, targetRoll):
         #Lines up on specific face, continuous loop until lined up or marker goes out of vision
+        self.linedUp = False
         while not self.linedUp:
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo != None:
@@ -204,6 +226,7 @@ class MyRobot(Robot):
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo == None: #If face not seen, turns on the spot
                 self.turn(self.SPEED) #NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+                                    #If box lost, set targetFace to [] again
             else:
                 self.stop()
                 if self.linedUp:
@@ -231,23 +254,24 @@ class MyRobot(Robot):
             markerInfo = self.findFace(markerID, roll)
             if markerInfo == None:
                 self.turn(self.SPEED) #NEEDS WAY TO EXIT IF NOT FOUND
+                                      # If box lost, set targetFace to [] again
                 #markerInfo = self.lineUp(markerID)
             else:
-                distance = markerInfo.position.distance
-                self.move(0.2, distance-25)
-                targetReached = True
+                if self.linedUp:
+                    distance = markerInfo.position.distance
+                    self.move(0.2, distance-25)
+                    targetReached = True
+                else:
+                    markerInfo = self.lineUp(markerID, roll)
 
 
-    def moveGrabber(self, grab: bool):
-
-
-
+    def grab(self):
         return
 
+    def release(self):
+        return
 
     def scissorUp(self, height):
-
-
         return
 
     def scissorDown(self):

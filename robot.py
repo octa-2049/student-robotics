@@ -14,11 +14,18 @@ def compCode(myRobot): #Code for actual robot
     while True:
         if myRobot.targetFace == []:
             myRobot.findBestMarker()
-        elif not myRobot.linedUp:
-            myRobot.lineUp(myRobot.targetFace.id, myRobot.getRoll(myRobot.targetFace))
-
         elif not myRobot.reachedTarget:
             myRobot.goToBoxShort(myRobot.targetFace)
+        else:
+            if myRobot.isTargetBox:
+                myRobot.grab()
+                myRobot.scissorUp(130) #Lifts box height of one box
+            else: #If target is a high rise
+                myRobot.scissorUp(135) #Slightly higher than actual high rise for clearance
+                myRobot.release()
+                #need to remove id from target ids after being placed (maybe)
+                myRobot.reset() #Start loop again to look for next box
+
 
 def extra():
     global ARDUINO_SN
