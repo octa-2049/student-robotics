@@ -7,8 +7,9 @@ ARDUINO_SN = ""
 def test(myRobot):
     while True:
         markers = myRobot.look()
-        bestMarker = myRobot.chooseBestFace(markers)
-        myRobot.goToBoxShort(bestMarker)
+        if markers != []:
+            bestMarker = myRobot.chooseBestFace(markers)
+            myRobot.goToBoxShort(bestMarker)
 
 def compCode(myRobot): #Code for actual robot
     while True:
