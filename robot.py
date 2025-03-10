@@ -5,6 +5,7 @@ ARDUINO_SN = ""
 
 
 def test(myRobot):
+    markers = myRobot.look()
     while True:
         markers = myRobot.look()
         if markers != []:
@@ -37,4 +38,4 @@ def extra():
         robot.sleep(1)
 
 test(robot)
-compCode(robot)
+#compCode(robot)
