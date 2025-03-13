@@ -115,8 +115,11 @@ class MyRobot(Robot):
             self.stop()
 
     def look(self, targetIDs=None):
+        self.stop()
+        print("Stopped")
+        self.sleep(1)
+        print("Arise")
         targetInfos = []  # Multiple faces of same target stored here
-        # markers = None
         markers = self.camera.see()
         self.targetFound = False
         if markers != None:
@@ -135,11 +138,12 @@ class MyRobot(Robot):
         targetId = [targetId]
         targetInfos = self.look(targetId)
         self.faceFound = False
-        for marker in targetInfos:
-            accRoll = self.roundRollDeg(marker.orientation.roll)
-            if accRoll == targetRoll:
-                self.faceFound = True
-                return marker  # Only one marker returned
+        if targetInfos != None:
+            for marker in targetInfos:
+                accRoll = self.roundRollDeg(marker.orientation.roll)
+                if accRoll == targetRoll:
+                    self.faceFound = True
+                    return marker  # Only one marker returned
         return None
 
     def roundRollDeg(self, roll):  # Check which orientation side is
@@ -201,6 +205,28 @@ class MyRobot(Robot):
                 self.linedUp = False
                 return None
 
+    def lineUpWithoutEncoders(self, targetID, targetRoll):
+        print("lining up without encoders")
+        # Lines up on specific face, continuous loop until lined up or marker goes out of vision
+        self.linedUp = False
+        while not self.linedUp:
+            markerInfo = self.findFace(targetID, targetRoll)
+            if markerInfo != None:
+                angleOut = markerInfo.position.horizontal_angle
+                if -0.05 < angleOut < 0.05:
+                    print("lined up")
+                    self.linedUp = True
+                    self.stop()
+                    return markerInfo
+                else:
+                    if angleOut < 0:
+                        self.turn(-self.SPEED)
+                    else:
+                        self.turn(self.SPEED)
+            else:
+                self.linedUp = False
+                return None
+
     def findBestMarker(self):
         # Finds next marker to go towards (either box or high rise)
         if self.isTargetBox:  # To choose whether target box or high rise
@@ -249,6 +275,37 @@ class MyRobot(Robot):
 
     def goToBoxShort(self, targetInfo):
         markerID = targetInfo.id
+        print("Looking for " + str(markerID))
+        roll = self.getRoll(targetInfo)
+        targetReached = False
+        while not targetReached:
+            #markerInfo = self.findFace(markerID, roll)
+            markerInfo = self.look([markerID])
+            if markerInfo == None:
+                print("no marker found")
+                self.turn(self.SPEED, math.pi /15)  # NEEDS WAY TO EXIT IF NOT FOUND
+                # If box lost, set targetFace to [] again
+                # markerInfo = self.lineUp(markerID)
+            else:
+                markerInfo = markerInfo[0]
+                angleOut = markerInfo.position.horizontal_angle
+                print("Found marker")
+                if abs(angleOut) < 0.02:
+                    print("Moving straight")
+                    distance = markerInfo.position.distance
+                    self.move(self.SPEED, distance - 25)
+                    if distance < 300:
+                        print("Box reached")
+                        targetReached = True
+                elif angleOut < 0:
+                    self.turn(-1 * self.SPEED, abs(angleOut))
+                else:
+                    self.turn(self.SPEED, abs(angleOut))
+
+                    #markerInfo = self.lineUp(markerID, roll)
+
+    def goToBoxWithoutEncoders(self, targetInfo):
+        markerID = targetInfo.id
         roll = self.getRoll(targetInfo)
         targetReached = False
         while not targetReached:
@@ -258,12 +315,21 @@ class MyRobot(Robot):
                 # If box lost, set targetFace to [] again
                 # markerInfo = self.lineUp(markerID)
             else:
-                if self.linedUp:
+                angleOut = markerInfo.position.horizontal_angle
+                print("Found marker")
+                if abs(angleOut) < 0.02:
+                    print("linedUp")
                     distance = markerInfo.position.distance
-                    self.move(0.2, distance - 25)
-                    targetReached = True
+                    if distance < 300:
+                        targetReached = True
+                        self.stop()
+                    else:
+                        self.move(0.2)
+                elif angleOut < 0:
+                        self.turn(-self.SPEED)
                 else:
-                    markerInfo = self.lineUp(markerID, roll)
+                    self.turn(self.SPEED)
+                    #markerInfo = self.lineUpWithoutEncoders(markerID, roll)
 
     def grab(self):
         return
