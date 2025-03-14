@@ -10,7 +10,7 @@ class MyRobot(Robot):
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
-        self.MOTOR2 = ""  # For scissor lift
+        self.MOTOR2 = "SR0TDC"  # For scissor lift
 
         # Variables
 
@@ -117,9 +117,10 @@ class MyRobot(Robot):
     def look(self, targetIDs=None):
         self.stop()
         print("Stopped")
-        self.sleep(1)
-        print("Arise")
+        self.sleep(0.5)
+        print("Started")
         targetInfos = []  # Multiple faces of same target stored here
+        # markers = None
         markers = self.camera.see()
         self.targetFound = False
         if markers != None:
@@ -192,15 +193,15 @@ class MyRobot(Robot):
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo != None:
                 angleOut = markerInfo.position.horizontal_angle
-                if -0.05 < angleOut < 0.05:
+                if abs(angleOut) < 0.5:
                     self.linedUp = True
                     self.stop()
                     return markerInfo
                 else:
                     if angleOut < 0:
-                        self.turn(-self.SPEED, abs(angleOut))
+                        self.turn(-self.SPEED, abs(angleOut/2))
                     else:
-                        self.turn(self.SPEED, angleOut)
+                        self.turn(self.SPEED, angleOut/2)
             else:
                 self.linedUp = False
                 return None
@@ -268,7 +269,7 @@ class MyRobot(Robot):
                     speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
                     self.move(speed, distanceAway)
                     self.turn(speed, math.pi / 2)
-                    self.move(self.SPEED, distanceTowards)
+                    self.move(speed, distanceTowards)
                     targetReached = True
                 else:
                     markerInfo = self.lineUp(targetID, targetRoll)
@@ -283,24 +284,25 @@ class MyRobot(Robot):
             markerInfo = self.look([markerID])
             if markerInfo == None:
                 print("no marker found")
-                self.turn(self.SPEED, math.pi /15)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(self.SPEED, math.pi /30)  # NEEDS WAY TO EXIT IF NOT FOUND
                 # If box lost, set targetFace to [] again
                 # markerInfo = self.lineUp(markerID)
             else:
                 markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
-                if abs(angleOut) < 0.02:
+                if abs(angleOut) < 0.1:
                     print("Moving straight")
                     distance = markerInfo.position.distance
-                    self.move(self.SPEED, distance - 25)
+                    self.move(self.SPEED)#, distance - 25)
+                    self.sleep(0.5)
                     if distance < 300:
                         print("Box reached")
                         targetReached = True
                 elif angleOut < 0:
-                    self.turn(-1 * self.SPEED, abs(angleOut))
+                    self.turn(-1 * self.SPEED, abs(angleOut/2))
                 else:
-                    self.turn(self.SPEED, abs(angleOut))
+                    self.turn(self.SPEED, abs(angleOut/2))
 
                     #markerInfo = self.lineUp(markerID, roll)
 
