@@ -214,7 +214,7 @@ class MyRobot(Robot):
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo != None:
                 angleOut = markerInfo.position.horizontal_angle
-                if -0.05 < angleOut < 0.05:
+                if abs(angleOut) < 0.5:
                     print("lined up")
                     self.linedUp = True
                     self.stop()
