@@ -352,8 +352,8 @@ class MyRobot(Robot):
             angle += interval
             self.sleep(0.25)
 
-    def release(self):
-        return
+    def release(self): #doesn't work
+        self.servo_board.servos[0].position = -1
 
     def scissorUp(self, height):
         return
