@@ -6,7 +6,9 @@ class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
+        self.PAUSE = 0.5 #Time in seconds for sleep time
         self.SPEED = 0.2
+        self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
@@ -71,7 +73,7 @@ class MyRobot(Robot):
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
             self.leftMotor.power = speed
-            self.rightMotor.power = speed
+            self.rightMotor.power = speed * self.SPEED_MULTIPLIER
             self.isMoving = True
         else:
             distanceMoved = 0
@@ -87,14 +89,14 @@ class MyRobot(Robot):
                 distanceMoved = avgDiff * self.DIAMETER * math.pi
                 distanceMoved = round(distanceMoved, -2)
                 self.leftMotor.power = speed
-                self.rightMotor.power = speed
+                self.rightMotor.power = speed * self.SPEED_MULTIPLIER
             self.stop()
 
     def turn(self, speed=0.2, angle=None):
         # When speed positive robot turns clockwise
         if angle == None:
             self.leftMotor.power = speed
-            self.rightMotor.power = -speed
+            self.rightMotor.power = -speed * self.SPEED_MULTIPLIER
             self.isTurning = True
 
         else:
@@ -111,14 +113,15 @@ class MyRobot(Robot):
                 avgDiff = (leftDiff + rightDiff) / 2
                 angleTurned = (avgDiff * 2 * math.pi)
                 self.leftMotor.power = speed
-                self.rightMotor.power = -speed
+                self.rightMotor.power = -speed * self.SPEED_MULTIPLIER
             self.stop()
 
     def look(self, targetIDs=None):
+        self.sleep(self.PAUSE)
         self.stop()
-        print("Stopped")
-        self.sleep(0.5)
-        print("Started")
+        #print("Stopped")
+        self.sleep(self.PAUSE)
+        #print("Started")
         targetInfos = []  # Multiple faces of same target stored here
         # markers = None
         markers = self.camera.see()
@@ -214,7 +217,7 @@ class MyRobot(Robot):
             markerInfo = self.findFace(targetID, targetRoll)
             if markerInfo != None:
                 angleOut = markerInfo.position.horizontal_angle
-                if abs(angleOut) < 0.5:
+                if abs(angleOut) < 0.05:
                     print("lined up")
                     self.linedUp = True
                     self.stop()
@@ -291,7 +294,7 @@ class MyRobot(Robot):
                 markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
-                if abs(angleOut) < 0.1:
+                if abs(angleOut) < 0.2:
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.SPEED)#, distance - 25)
@@ -343,10 +346,10 @@ class MyRobot(Robot):
             microswitchR = self.arduino.pins[11].digital_read()
             if angle > 1:
                 print("no box grabbed")
-                self.kch.leds[LED_A].colour = Colour.RED
+                #self.kch.leds[LED_A].colour = Colour.RED
                 break
             if not microswitchL and not microswitchR:
-                self.kch.leds[LED_A].colour = Colour.GREEN
+                #self.kch.leds[LED_A].colour = Colour.GREEN
                 grabbed = True
             self.servo_board.servos[0].position = angle
             angle += interval
