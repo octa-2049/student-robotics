@@ -334,7 +334,23 @@ class MyRobot(Robot):
                     #markerInfo = self.lineUpWithoutEncoders(markerID, roll)
 
     def grab(self):
-        return
+        angle = -1
+        interval = 0.05
+        grabbed = False
+        while not grabbed:
+            print(angle)
+            microswitchL = self.arduino.pins[10].digital_read()
+            microswitchR = self.arduino.pins[11].digital_read()
+            if angle > 1:
+                print("no box grabbed")
+                self.kch.leds[LED_A].colour = Colour.RED
+                break
+            if not microswitchL and not microswitchR:
+                self.kch.leds[LED_A].colour = Colour.GREEN
+                grabbed = True
+            self.servo_board.servos[0].position = angle
+            angle += interval
+            self.sleep(0.25)
 
     def release(self):
         return
