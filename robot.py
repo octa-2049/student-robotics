@@ -12,7 +12,7 @@ def test(myRobot):
         if markers != []:
             myRobot.stop()
             bestMarker = myRobot.chooseBestFace(markers)
-            return myRobot.goToBoxShort(bestMarker)
+            return myRobot.goToBoxLong(bestMarker)
 
         else:
             myRobot.turn(myRobot.SPEED)
@@ -53,4 +53,5 @@ def testEncoders(robot):
     print("Average speed Motor 1:", total_speed1/count)
 
 
-testEncoders(robot)
+#testEncoders(robot)
+test(robot)

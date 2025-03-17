@@ -6,8 +6,8 @@ class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
-        self.PAUSE = 0.5 #Time in seconds for sleep time
-        self.SPEED = 0.2
+        self.PAUSE = 0.5 #Tme in seconds for sleep time
+        self.SPEED = 0.5
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
@@ -254,12 +254,13 @@ class MyRobot(Robot):
         targetReached = False
         self.linedUp = False
         while not targetReached:
-            markerInfo = self.findFace(targetID, targetRoll)
+            markerInfo = self.look([targetID])
             if markerInfo == None:  # If face not seen, turns on the spot
                 self.turn(self.SPEED)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
                 # If box lost, set targetFace to [] again
             else:
                 self.stop()
+                markerInfo = markerInfo[0]
                 if self.linedUp:
                     yaw = self.getYawRad(markerInfo)
                     if yaw < 0:
@@ -272,9 +273,24 @@ class MyRobot(Robot):
                     speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
                     self.move(speed, distanceAway)
                     self.turn(speed, math.pi / 2)
-                    self.move(speed, distanceTowards)
+                    #self.move(speed, distanceTowards)
+                    self.goToBoxShort(targetInfo)
                     targetReached = True
                 else:
+                    angleOut = markerInfo.position.horizontal_angle
+                    print("Found marker")
+                    if abs(angleOut) < 0.2:
+                        print("Moving straight")
+                        distance = markerInfo.position.distance
+                        self.move(self.SPEED)  # , distance - 25)
+                        self.sleep(0.5)
+                        if distance < 300:
+                            print("Box reached")
+                            targetReached = True
+                    elif angleOut < 0:
+                        self.turn(-1 * self.SPEED, abs(angleOut / 2))
+                    else:
+                        self.turn(self.SPEED, abs(angleOut / 2))
                     markerInfo = self.lineUp(targetID, targetRoll)
 
     def goToBoxShort(self, targetInfo):
