@@ -8,6 +8,7 @@ class MyRobot(Robot):
 
         self.PAUSE = 0.5 #Tme in seconds for sleep time
         self.SPEED = 0.5
+        self.ANGLE_OUT = 0.3
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
@@ -28,6 +29,7 @@ class MyRobot(Robot):
         self.innerHighriseID = [199]
 
         # self.targetInfos = [] #All faces of id marker
+        self.targetID = None
         self.targetFace = []  # Specific face of certain marker
         self.targetRoll = None  # Will be -90, 0, 90 or 180 degrees
 
@@ -48,6 +50,7 @@ class MyRobot(Robot):
 
     def resetVariables(self):
         # Once box deposited, reset so that it restarts
+        self.targetID = None
         self.targetFace = []  # Specific face of certain marker
         self.targetRoll = None  # Will be -90, 0, 90 or 180 degrees
 
@@ -117,6 +120,7 @@ class MyRobot(Robot):
             self.stop()
 
     def look(self, targetIDs=None):
+        #returns SINGLE MARKER NOT LIST
         self.sleep(self.PAUSE)
         self.stop()
         #print("Stopped")
@@ -134,21 +138,22 @@ class MyRobot(Robot):
                     targetInfos.append(mark)
                     self.targetFound = True
         if targetInfos != []:
-            return targetInfos
-        return None
+            return targetInfos[0]
+        else:
+            return [] #either [] or list of markers
 
     def findFace(self, targetId, targetRoll):
         # To check if correct face side is seen (using roll)
         targetId = [targetId]
         targetInfos = self.look(targetId)
         self.faceFound = False
-        if targetInfos != None:
+        if targetInfos != []:
             for marker in targetInfos:
                 accRoll = self.roundRollDeg(marker.orientation.roll)
                 if accRoll == targetRoll:
                     self.faceFound = True
                     return marker  # Only one marker returned
-        return None
+        return []
 
     def roundRollDeg(self, roll):  # Check which orientation side is
         # Side either -180, 90, 0, 90, 180 degrees
@@ -187,49 +192,52 @@ class MyRobot(Robot):
         for marker in markers:
             if bestMarker.position.distance > marker.position.distance:
                 bestMarker = marker
+        self.targetID = bestMarker.id
+        self.targetFace = bestMarker
         return bestMarker
 
-    def lineUp(self, targetID, targetRoll):
+    def lineUp(self, targetID):
         # Lines up on specific face, continuous loop until lined up or marker goes out of vision
         self.linedUp = False
         while not self.linedUp:
-            markerInfo = self.findFace(targetID, targetRoll)
-            if markerInfo != None:
+            self.turn(self.SPEED, math.pi/40)
+            markerInfo = self.look(targetID)
+            if markerInfo != []:
+                markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
-                if abs(angleOut) < 0.5:
+                if abs(angleOut) < self.ANGLE_OUT:
                     self.linedUp = True
                     self.stop()
-                    return markerInfo
+                    #return markerInfo
                 else:
                     if angleOut < 0:
-                        self.turn(-self.SPEED, abs(angleOut/2))
+                        self.turn(-self.SPEED, abs(angleOut/4))
                     else:
-                        self.turn(self.SPEED, angleOut/2)
+                        self.turn(self.SPEED, angleOut/4)
             else:
                 self.linedUp = False
-                return None
+                #return []
 
-    def lineUpWithoutEncoders(self, targetID, targetRoll):
+    def lineUpWithoutEncoders(self, targetID):
         print("lining up without encoders")
-        # Lines up on specific face, continuous loop until lined up or marker goes out of vision
         self.linedUp = False
         while not self.linedUp:
-            markerInfo = self.findFace(targetID, targetRoll)
-            if markerInfo != None:
+            markerInfo = self.look(targetID)
+            if markerInfo != []:
+                markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
-                if abs(angleOut) < 0.05:
+                if abs(angleOut) < self.ANGLE_OUT:
                     print("lined up")
                     self.linedUp = True
                     self.stop()
-                    return markerInfo
+                    #return markerInfo
+                elif angleOut < 0:
+                    self.turn(-self.SPEED)
                 else:
-                    if angleOut < 0:
-                        self.turn(-self.SPEED)
-                    else:
-                        self.turn(self.SPEED)
+                    self.turn(self.SPEED)
             else:
                 self.linedUp = False
-                return None
+                #return None
 
     def findBestMarker(self):
         # Finds next marker to go towards (either box or high rise)
@@ -249,49 +257,35 @@ class MyRobot(Robot):
 
     def goToBoxLong(self, targetInfo):
         targetID = targetInfo.id
-        targetRoll = self.getRoll(targetInfo)
+        #targetRoll = self.getRoll(targetInfo)
         speed = 0.2
         targetReached = False
         self.linedUp = False
         while not targetReached:
             markerInfo = self.look([targetID])
-            if markerInfo == None:  # If face not seen, turns on the spot
-                self.turn(self.SPEED)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+            if markerInfo == []:  # If face not seen, turns on the spot
+                self.turn(self.SPEED, math.pi/40)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
                 # If box lost, set targetFace to [] again
             else:
                 self.stop()
-                markerInfo = markerInfo[0]
+                #markerInfo = markerInfo[0]
                 if self.linedUp:
                     yaw = self.getYawRad(markerInfo)
-                    if yaw < 0:
+                    if yaw > 0:
                         speed = -speed
-                        yaw = abs(yaw)
-                    distance = markerInfo.orientation.yaw
+                    yaw = abs(yaw)
+                    distance = markerInfo.position.distance
                     distanceAway = math.cos(yaw) * distance
-                    distanceTowards = math.sin(yaw) * distance
+                    #distanceTowards = math.sin(yaw) * distance
                     self.turn(speed, yaw)
                     speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
                     self.move(speed, distanceAway)
-                    self.turn(speed, math.pi / 2)
+                    self.turn(-speed, math.pi / 2)
                     #self.move(speed, distanceTowards)
                     self.goToBoxShort(targetInfo)
                     targetReached = True
                 else:
-                    angleOut = markerInfo.position.horizontal_angle
-                    print("Found marker")
-                    if abs(angleOut) < 0.2:
-                        print("Moving straight")
-                        distance = markerInfo.position.distance
-                        self.move(self.SPEED)  # , distance - 25)
-                        self.sleep(0.5)
-                        if distance < 300:
-                            print("Box reached")
-                            targetReached = True
-                    elif angleOut < 0:
-                        self.turn(-1 * self.SPEED, abs(angleOut / 2))
-                    else:
-                        self.turn(self.SPEED, abs(angleOut / 2))
-                    markerInfo = self.lineUp(targetID, targetRoll)
+                    self.lineUp(targetID)
 
     def goToBoxShort(self, targetInfo):
         markerID = targetInfo.id
@@ -301,27 +295,29 @@ class MyRobot(Robot):
         while not targetReached:
             #markerInfo = self.findFace(markerID, roll)
             markerInfo = self.look([markerID])
-            if markerInfo == None:
+            if markerInfo == []:
                 print("no marker found")
-                self.turn(self.SPEED, math.pi /30)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(self.SPEED, math.pi /40)  # NEEDS WAY TO EXIT IF NOT FOUND
                 # If box lost, set targetFace to [] again
                 # markerInfo = self.lineUp(markerID)
             else:
-                markerInfo = markerInfo[0]
+                #markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
-                if abs(angleOut) < 0.2:
+                if abs(angleOut) < self.ANGLE_OUT:
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.SPEED)#, distance - 25)
                     self.sleep(0.5)
-                    if distance < 300:
+                    if distance < 400:
+                        #NEED TO IMPLEMENT ULTRASOUND
+                        self.stop()
                         print("Box reached")
                         targetReached = True
                 elif angleOut < 0:
-                    self.turn(-1 * self.SPEED, abs(angleOut/2))
+                    self.turn(-1 * self.SPEED, abs(angleOut/4))
                 else:
-                    self.turn(self.SPEED, abs(angleOut/2))
+                    self.turn(self.SPEED, abs(angleOut/4))
 
                     #markerInfo = self.lineUp(markerID, roll)
 
@@ -374,8 +370,20 @@ class MyRobot(Robot):
     def release(self): #doesn't work
         self.servo_board.servos[0].position = -1
 
-    def scissorUp(self, height):
-        return
-
-    def scissorDown(self):
-        return
+    def scissorLift(self, height, lift_speed = 0.1):
+        target_height = height
+        current_height = 0
+        multiplier = 300  # to be confirmed
+        while current_height != target_height:
+            motor2position = self.arduino.command("b")
+            motor3position = self.arduino.command("c")
+            average_position = (motor2position * motor3position) / 2
+            current_height = average_position * multiplier
+            if current_height > target_height:
+                self.motor_boards["SR0TDC"].motors[0].power = -lift_speed
+                self.motor_boards["SR0TDC"].motors[1].power = -lift_speed
+            else:
+                self.motor_boards["SR0TDC"].motors[0].power = lift_speed
+                self.motor_boards["SR0TDC"].motors[1].power = lift_speed
+        self.motor_boards["SR0TDC"].motors[0].power = 0
+        self.motor_boards["SR0TDC"].motors[1].power = 0

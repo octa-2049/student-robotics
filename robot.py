@@ -27,12 +27,14 @@ def compCode(myRobot): #Code for actual robot
         else:
             if myRobot.isTargetBox:
                 myRobot.grab()
-                myRobot.scissorUp(130) #Lifts box height of one box
+                myRobot.scissorLift(130) #Lifts box height of one box
             else: #If target is a high rise
-                myRobot.scissorUp(135) #Slightly higher than actual high rise for clearance
+                myRobot.scissorLift(135) #Slightly higher than actual high rise for clearance
                 myRobot.release()
+                myRobot.move(-myRobot.SPEED, 200)
+                myRobot.scissorLift(0)
                 #need to remove id from target ids after being placed (maybe)
-                myRobot.reset() #Start loop again to look for next box
+                myRobot.resetVariables() #Start loop again to look for next box
 
 def testEncoders(robot):
     my_motor_board = robot.motor_board
