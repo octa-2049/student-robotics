@@ -79,7 +79,6 @@ class MyRobot(Robot):
         distance_mm = self.arduino.ultrasound_measure(self.US_TRIGGER, self.US_ECHO)
         return distance_mm
 
-
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
             self.LEFT_MOTOR.power = speed
