@@ -183,7 +183,7 @@ class MyRobot(Robot):
 
         # (Position.) Distance, horizontal_angle, vertical_angle
         print("Distance: ", marker.position.distance)
-        print("Horiz angle: ", marker.position.horizontal_angle)
+        print("Hor angle: ", marker.position.horizontal_angle)
         print("Vert angle:  ", marker.position.vertical_angle)
 
         # (Orientation) yaw, pitch, roll
