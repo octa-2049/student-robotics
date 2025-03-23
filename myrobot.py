@@ -181,7 +181,7 @@ class MyRobot(Robot):
         print("Pixel centre: ", marker.pixel_centre.x, marker.pixel_centre.y)
         print("Pixel corners: ", marker.pixel_corners)
 
-        # (Position.) Distance, horiztontal_angle, vertical_angle
+        # (Position.) Distance, horizontal_angle, vertical_angle
         print("Distance: ", marker.position.distance)
         print("Horiz angle: ", marker.position.horizontal_angle)
         print("Vert angle:  ", marker.position.vertical_angle)
