@@ -297,7 +297,7 @@ class MyRobot(Robot):
                 self.hasTarget = True
 
     def goToBoxLong(self, targetInfo=None):
-        self.getSquareOn(targetInfo)
+        self.getSquareOn(targetInfo.id)
         self.goToBoxStraight(targetInfo)
 
     def goToBoxStraight(self, targetInfo = None, markerID = None):
