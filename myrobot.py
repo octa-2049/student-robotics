@@ -364,7 +364,7 @@ class MyRobot(Robot):
     def getSquareOn(self, targetID):
         #Allows for only ID
         speed = 0.2
-        targetReached = False
+        squareOn = False
         self.linedUp = False
         timesTurned = 0 #Times turned in a row without seeing a box
         #If this exceeds self.fractionTurned then we have turned full
