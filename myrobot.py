@@ -357,7 +357,7 @@ class MyRobot(Robot):
                 start = self.time()
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
-                if abs(angleOut) < self.ANGLE_OUT:
+                if self.linedUp:
                     print("linedUp")
                     distance = markerInfo.position.distance
                     if distance < 300:
