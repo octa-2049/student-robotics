@@ -270,7 +270,6 @@ class MyRobot(Robot):
         while not self.linedUp:
             markerInfo = self.look(targetID)
             if markerInfo != []:
-                markerInfo = markerInfo[0]
                 angleOut = markerInfo.position.horizontal_angle
                 if abs(angleOut) < self.ANGLE_OUT:
                     print("lined up")
