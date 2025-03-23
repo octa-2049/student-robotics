@@ -7,7 +7,7 @@ class MyRobot(Robot):
         super().__init__()
 
         self.PAUSE = 0.5 #Tme in seconds for sleep time
-        self.SPEED = 0.5
+        self.MAX_SPEED = 0.5
         self.ANGLE_OUT = 0.3
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
