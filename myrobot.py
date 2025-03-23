@@ -359,7 +359,7 @@ class MyRobot(Robot):
                     else:
                         self.move(self.MAX_SPEED)
                 else:
-                    markerInfo = self.lineUpWithoutEncoders(markerID)
+                    self.lineUpWithoutEncoders(markerID)
 
     def getSquareOn(self, targetID):
         #Allows for only ID
