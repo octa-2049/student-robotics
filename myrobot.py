@@ -278,11 +278,7 @@ class MyRobot(Robot):
 
     def findBestMarker(self):
         timesTurned = 0 #Times turned in a row
-        # Finds next marker to go towards (either box or high rise)
-        if self.isTargetBox:  # To choose whether target box or high rise
-            targetIDs = self.palletIDs
-        else:
-            targetIDs = self.outerHighriseIDs
+        targetIDs = self.palletIDs
         while not self.hasTarget:
             markers = self.look(targetIDs)
             if markers == []:
