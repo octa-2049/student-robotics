@@ -357,7 +357,7 @@ class MyRobot(Robot):
             else:
                 timesTurned = 0
                 print("Found marker")
-                if abs(angleOut) < self.ANGLE_OUT:
+                if self.linedUp:
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.SPEED)#, distance - 25)
