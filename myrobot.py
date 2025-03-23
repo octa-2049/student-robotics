@@ -400,14 +400,32 @@ class MyRobot(Robot):
         self.turn(self.MAX_SPEED, math.pi / 4)
         self.move(self.MAX_SPEED, 0.2)
 
-    def goToHighRise(self):
-        #Goes to closest with high rise
-        visibleHighRises = []
-        for turns in range(self.TURN_FRACTION):
-            markers = self.look(self.outerHighriseIDs)
-
-        return
-
+    def goToHighRise(self, markerID):
+        print("Looking for " + str(markerID))
+        targetReached = False
+        timesTurned = 0
+        while not targetReached:
+            markerInfo = self.look([markerID])
+            if not self.targetFound:
+                if timesTurned > self.TURN_FRACTION:
+                    self.randomMovement()
+                    timesTurned = 0
+                print("no marker found")
+                self.turn(self.MAX_SPEED, math.pi / 40)  # NEEDS WAY TO EXIT IF NOT FOUND
+                timesTurned += 1
+            else:
+                timesTurned = 0
+                print("Found marker")
+                if self.linedUp:
+                    print("Moving straight")
+                    distance = markerInfo.position.distance
+                    self.move(self.MAX_SPEED, distance / 4)
+                    # May try to variate speed depending on distance to marker
+                    self.sleep(0.5)
+                    if distance < 400:  # NEEDS TO BE TESTED
+                        targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
+                else:
+                    self.lineUp(markerID)
 
     def grab(self):
         angle = -1
