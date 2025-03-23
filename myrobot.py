@@ -91,7 +91,7 @@ class MyRobot(Robot):
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
                 rightDiff = abs(startRightPos - currentRightPos)
-                leftDiff = rightDiff  # Needs to be deleted when right encoder works
+                #leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
                 distanceMoved = avgDiff * self.DIAMETER * math.pi
                 distanceMoved = round(distanceMoved, -2)
