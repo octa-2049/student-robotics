@@ -77,6 +77,11 @@ class MyRobot(Robot):
         distance_mm = self.arduino.ultrasound_measure(self.US_TRIGGER, self.US_ECHO)
         return distance_mm
 
+    def isHoldingBox(self): #NEED TO CHECK IF RIGHT WAY ROUND
+        microSwitchLeft = self.arduino.pins[10].digital_read()
+        microSwitchRight = self.arduino.pins[11].digital_read()
+        return not microSwitchLeft and not microSwitchRight
+
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
             self.LEFT_MOTOR.power = speed
