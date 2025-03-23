@@ -126,8 +126,8 @@ class MyRobot(Robot):
                 leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
                 angleTurned = (avgDiff * 2 * math.pi)
-                self.leftMotor.power = speed
-                self.rightMotor.power = -speed * self.SPEED_MULTIPLIER
+                self.LEFT_MOTOR.power = speed
+                self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
             self.stop()
 
     def look(self, targetIDs=None):
