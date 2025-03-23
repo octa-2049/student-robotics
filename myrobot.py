@@ -418,6 +418,7 @@ class MyRobot(Robot):
                 break
             if not microSwitchLeft and not microSwitchRight:
                 #self.kch.leds[LED_A].colour = Colour.GREEN
+                self.grabbed = True
                 grabbed = True
             self.servo_board.servos[0].position = angle
             angle += interval
