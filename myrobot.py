@@ -296,9 +296,9 @@ class MyRobot(Robot):
                 self.targetFace = self.chooseBestMarker(markers)
                 self.hasTarget = True
 
-    def goToBoxLong(self, targetInfo=None):
-        self.getSquareOn(targetInfo.id)
-        self.goToBoxStraight(targetInfo)
+    def goToBoxLong(self, targetID):
+        self.getSquareOn(targetID)
+        self.goToBoxStraight(targetID)
 
     def goToBoxStraight(self, targetInfo = None, markerID = None):
         if targetInfo != None:
