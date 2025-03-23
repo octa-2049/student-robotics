@@ -302,47 +302,6 @@ class MyRobot(Robot):
 
     def goToBoxStraight(self, targetInfo = None, markerID = None):
         if targetInfo != None:
-            targetID = targetInfo.id
-        speed = 0.2
-        targetReached = False
-        self.linedUp = False
-        timesTurned = 0 #Times turned in a row without seeing a box
-        #If this exceeds self.fractionTurned then we have turned full
-        #360 degrees without finding a box and need to perform evasive manoeuvres
-        #If box still not found then assumes box is lost and break loop
-        randomMovementDone = False
-        while not targetReached:
-            markerInfo = self.look([targetID])
-            if not self.targetFound:  # If face not seen, turns on the spot
-                if timesTurned > self.TURN_FRACTION:
-                    if randomMovementDone:
-                        self.resetVariables() # If box lost, reset variables
-                        return None
-                    self.randomMovement()
-                    randomMovementDone = True
-                    timesTurned = 0
-                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
-                timesTurned += 1
-            else:
-                self.stop()
-                if self.linedUp:
-                    yaw = self.getYawRad(markerInfo)
-                    if yaw > 0:
-                        speed = -speed
-                    yaw = abs(yaw)
-                    distance = markerInfo.position.distance
-                    distanceAway = math.cos(yaw) * distance
-                    self.turn(speed, yaw)
-                    speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
-                    self.move(speed, distanceAway)
-                    self.turn(-speed, math.pi / 2)
-                    self.goToBoxShort(targetInfo)
-                    targetReached = True
-                else:
-                    self.lineUp(targetID)
-
-    def goToBoxShort(self, targetInfo = None, markerID = None):
-        if targetInfo != None:#
             markerID = targetInfo.id
         print("Looking for " + str(markerID))
         targetReached = False
