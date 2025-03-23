@@ -99,7 +99,7 @@ class MyRobot(Robot):
                 self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
             self.stop()
 
-    def turn(self, speed=0.2, angle=None):
+    def turn(self, speed, angle=None):
         # When speed positive robot turns clockwise
         if angle == None:
             self.LEFT_MOTOR.power = speed
