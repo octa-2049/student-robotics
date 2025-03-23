@@ -354,6 +354,7 @@ class MyRobot(Robot):
                     self.resetVariables()
                     return None
             else:
+                start = self.time()
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
                 if abs(angleOut) < self.ANGLE_OUT:
