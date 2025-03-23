@@ -134,8 +134,6 @@ class MyRobot(Robot):
         #print("Stopped")
         self.sleep(self.PAUSE)
         #print("Started")
-        targetInfos = []  # Multiple faces of same target stored here
-        # markers = None
         markers = self.camera.see()
         self.targetFound = False
         if markers != None:
