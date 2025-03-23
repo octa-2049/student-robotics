@@ -275,7 +275,6 @@ class MyRobot(Robot):
                     print("lined up")
                     self.linedUp = True
                     self.stop()
-                    #return markerInfo
                 elif angleOut < 0:
                     self.turn(-self.MAX_SPEED)
                 else:
