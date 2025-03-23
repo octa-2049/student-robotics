@@ -399,7 +399,7 @@ class MyRobot(Robot):
                 else:
                     self.lineUp(targetID)
 
-    def randomMovement(self):
+    def randomMovement(self): #Unfinished
         self.move(self.MAX_SPEED, 0.2)
         self.turn(self.MAX_SPEED, math.pi / 4)
         self.move(self.MAX_SPEED, 0.2)
