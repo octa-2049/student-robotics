@@ -114,6 +114,7 @@ class MyRobot(Robot):
 
         else:
             angleToTurn = angle * self.WIDTH / self.DIAMETER
+            #angleToTurn in arbitrary units 1 = 1 complete revolution of wheel
             angleTurned = 0
             startLeftPos = float(self.arduino.command("n"))
             startRightPos = float(self.arduino.command("y"))
