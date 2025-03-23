@@ -250,7 +250,6 @@ class MyRobot(Robot):
         # Lines up on specific face,if marker goes out of vision breaks loop
         self.linedUp = False
         while not self.linedUp:
-            self.turn(self.SPEED, math.pi/40)
             markerInfo = self.look(targetID)
             if markerInfo != []:
                 markerInfo = markerInfo[0]
