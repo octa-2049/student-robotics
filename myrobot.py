@@ -101,8 +101,8 @@ class MyRobot(Robot):
                 avgDiff = (leftDiff + rightDiff) / 2
                 distanceMoved = avgDiff * self.DIAMETER * math.pi
                 distanceMoved = round(distanceMoved, -2)
-                self.leftMotor.power = speed
-                self.rightMotor.power = speed * self.SPEED_MULTIPLIER
+                self.LEFT_MOTOR.power = speed
+                self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
             self.stop()
 
     def turn(self, speed=0.2, angle=None):
