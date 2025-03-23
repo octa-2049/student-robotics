@@ -316,9 +316,16 @@ class MyRobot(Robot):
         randomMovementDone = False
         while not targetReached:
             markerInfo = self.look([targetID])
-            if markerInfo == []:  # If face not seen, turns on the spot
-                self.turn(self.SPEED, math.pi/40)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
-                # If box lost, set targetFace to [] again
+            if not self.targetFound:  # If face not seen, turns on the spot
+                if timesTurned > self.TURN_FRACTION:
+                    if randomMovementDone:
+                        self.resetVariables() # If box lost, reset variables
+                        return None
+                    self.randomMovement()
+                    randomMovementDone = True
+                    timesTurned = 0
+                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+                timesTurned += 1
             else:
                 self.stop()
                 #markerInfo = markerInfo[0]
