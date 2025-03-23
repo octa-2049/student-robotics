@@ -338,8 +338,9 @@ class MyRobot(Robot):
                 else:
                     self.lineUp(targetID)
 
-    def goToBoxShort(self, targetInfo):
-        markerID = targetInfo.id
+    def goToBoxShort(self, targetInfo = None, markerID = None):
+        if targetInfo != None:#
+            markerID = targetInfo.id
         print("Looking for " + str(markerID))
         roll = self.getRoll(targetInfo)
         targetReached = False
