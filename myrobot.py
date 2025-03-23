@@ -2,6 +2,7 @@ import math
 from sr.robot3 import *
 
 
+# noinspection PyComparisonWithNone
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
@@ -197,7 +198,6 @@ class MyRobot(Robot):
         print("Roll ", marker.orientation.roll)
         print("Actual yaw: " + str(self.getYawRad(marker)))
 
-
     def roundRollDeg(self, roll):  # Check which orientation side is
         # Side either -180, 90, 0, 90, 180 degrees
         rollDeg = math.degrees(roll)
@@ -276,7 +276,7 @@ class MyRobot(Robot):
                 self.linedUp = False
                 return None
 
-    def findBestMarker(self):
+    def findBestPallet(self):
         timesTurned = 0 #Times turned in a row
         targetIDs = self.palletIDs
         while not self.hasTarget:
@@ -321,19 +321,19 @@ class MyRobot(Robot):
                     #May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 400: #NEEDS TO BE TESTED
-                        targetReached = self.goToBoxUltrasound()
+                        targetReached = self.goToMarkerUltrasound(50)
                 else:
                     self.lineUp(markerID)
 
-    def goToBoxUltrasound(self):
+    def goToMarkerUltrasound(self, distanceAway):
         start = self.time()
         end = self.time()
         self.move(self.MAX_SPEED)
         while (start - end) < 5:
             distance = self.getUltrasoundDistance()
-            if distance < 50:  # NEEDS TO BE TESTED
+            if distance < distanceAway:
                 self.stop()
-                print("Box reached")
+                print("Marker reached")
                 return True
         return False
 

@@ -11,19 +11,21 @@ def test(myRobot):
         markers = myRobot.look()
         if markers != []:
             myRobot.stop()
-            bestMarker = myRobot.chooseBestFace(markers)
-            return myRobot.goToBoxLong(bestMarker)
+            return myRobot.goToBoxLong(myRobot.targetID)
 
         else:
-            myRobot.turn(myRobot.SPEED)
+            myRobot.turn(myRobot.MAX_SPEED)
             #robot.sleep(1)
 
 def compCode(myRobot): #Code for actual robot
     while True:
-        if myRobot.targetFace == []:
-            myRobot.findBestMarker()
+        if not myRobot.hasTarget:
+            if myRobot.isTargetBox:
+                myRobot.findBestPallet()
+            else:
+                myRobot.goToHighRise(myRobot.targetID)
         elif not myRobot.reachedTarget:
-            myRobot.goToBoxShort(myRobot.targetFace)
+            myRobot.goToBoxStraight(myRobot.targetID)
         else:
             if myRobot.isTargetBox:
                 myRobot.grab()
@@ -31,7 +33,7 @@ def compCode(myRobot): #Code for actual robot
             else: #If target is a high rise
                 myRobot.scissorLift(135) #Slightly higher than actual high rise for clearance
                 myRobot.release()
-                myRobot.move(-myRobot.SPEED, 200)
+                myRobot.move(-myRobot.MAX_SPEED, 200)
                 myRobot.scissorLift(0)
                 #need to remove id from target ids after being placed (maybe)
                 myRobot.resetVariables() #Start loop again to look for next box
@@ -62,8 +64,8 @@ def testEncoders(myRobot):
     for i in range(5000):
         my_motor_board.motors[0].power = 0.5
         my_motor_board.motors[1].power = 0.96482070964 * 0.5
-        speed0 = float(robot.arduino.command("m"))
-        speed1 = float(robot.arduino.command("x"))
+        speed0 = float(myRobot.arduino.command("m"))
+        speed1 = float(myRobot.arduino.command("x"))
         total_speed0 += speed0
         total_speed1 += speed1
         count += 1
@@ -73,4 +75,4 @@ def testEncoders(myRobot):
 
 
 #testEncoders(robot)
-test(robot)
+#test(robot)
