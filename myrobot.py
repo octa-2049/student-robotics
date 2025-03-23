@@ -360,7 +360,7 @@ class MyRobot(Robot):
                 if self.linedUp:
                     print("Moving straight")
                     distance = markerInfo.position.distance
-                    self.move(self.MAX_SPEED)
+                    self.move(self.MAX_SPEED, distance / 4)
                     #May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 400:
