@@ -155,6 +155,31 @@ class MyRobot(Robot):
                     return marker  # Only one marker returned
         return []
 
+    def printMarkerInfo(self, marker):
+        # Id, size
+        print("Id: ", marker.id)
+        print("Size: ", marker.size)
+
+        # Pixel centre, pixel_corners (
+        print("Pixel centre: ", marker.pixel_centre.x, marker.pixel_centre.y)
+        print("Pixel corners: ", marker.pixel_corners)
+
+        # (Position.) Distance, horiztontal_angle, vertical_angle
+        print("Distance: ", marker.position.distance)
+        print("Horiz angle: ", marker.position.horizontal_angle)
+        print("Vert angle:  ", marker.position.vertical_angle)
+
+        # (Orientation) yaw, pitch, roll
+        print("Yaw: ", marker.orientation.yaw)
+        print("Pitch: ", marker.orientation.pitch)
+        print("Roll ", marker.orientation.roll)
+        print("Actual yaw: " + str(self.getYawRad(marker)))
+
+    def triangulate(self):
+        #Find position relative to centre
+
+        return
+
     def roundRollDeg(self, roll):  # Check which orientation side is
         # Side either -180, 90, 0, 90, 180 degrees
         rollDeg = math.degrees(roll)
