@@ -336,7 +336,6 @@ class MyRobot(Robot):
                     yaw = abs(yaw)
                     distance = markerInfo.position.distance
                     distanceAway = math.cos(yaw) * distance
-                    #distanceTowards = math.sin(yaw) * distance
                     self.turn(speed, yaw)
                     speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
                     self.move(speed, distanceAway)
