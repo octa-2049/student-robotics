@@ -143,7 +143,6 @@ class MyRobot(Robot):
                 if mark.id in targetIDs:
                     self.targetFound = True
                     return mark
-        self.targetFound = False
         return [] #returns either [] or first marker seen
 
     def lookAll(self, targetIDs=None):
