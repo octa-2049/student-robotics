@@ -296,8 +296,11 @@ class MyRobot(Robot):
                 self.targetFace = self.chooseBestMarker(markers)
                 self.hasTarget = True
 
-    def goToBoxLong(self, targetInfo=None, targetID = None):
-        #Allows for either marker or id
+    def goToBoxLong(self, targetInfo=None):
+        self.getSquareOn(targetInfo)
+        self.goToBoxStraight(targetInfo)
+
+    def goToBoxStraight(self, targetInfo = None, markerID = None):
         if targetInfo != None:
             targetID = targetInfo.id
         speed = 0.2
