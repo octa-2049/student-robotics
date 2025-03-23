@@ -409,8 +409,8 @@ class MyRobot(Robot):
         grabbed = False
         while not grabbed:
             print(angle)
-            microswitchL = self.arduino.pins[10].digital_read()
-            microswitchR = self.arduino.pins[11].digital_read()
+            microSwitchLeft = self.arduino.pins[10].digital_read()
+            microSwitchRight = self.arduino.pins[11].digital_read()
             if angle > 1:
                 print("no box grabbed")
                 #self.kch.leds[LED_A].colour = Colour.RED
