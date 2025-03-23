@@ -340,9 +340,7 @@ class MyRobot(Robot):
                 return True
         return False
 
-    def goToBoxWithoutEncoders(self, targetInfo):
-        markerID = targetInfo.id
-        #roll = self.getRoll(targetInfo)
+    def goToBoxWithoutEncoders(self, markerID):
         targetReached = False
         start = self.time()
         while not targetReached:
