@@ -300,9 +300,7 @@ class MyRobot(Robot):
         self.getSquareOn(targetID)
         self.goToBoxStraight(targetID)
 
-    def goToBoxStraight(self, targetInfo = None, markerID = None):
-        if targetInfo != None:
-            markerID = targetInfo.id
+    def goToBoxStraight(self, markerID = None):
         print("Looking for " + str(markerID))
         targetReached = False
         timesTurned = 0
