@@ -242,7 +242,6 @@ class MyRobot(Robot):
                 bestMarker = marker
         self.targetID = bestMarker.id
         self.targetFace = bestMarker
-        return bestMarker
 
     def lineUp(self, targetID):
         # Lines up on specific face,if marker goes out of vision breaks loop
