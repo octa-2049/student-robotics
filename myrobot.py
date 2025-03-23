@@ -414,6 +414,7 @@ class MyRobot(Robot):
             if angle > 1:
                 print("no box grabbed")
                 #self.kch.leds[LED_A].colour = Colour.RED
+                self.grabbed = False
                 break
             if not microswitchL and not microswitchR:
                 #self.kch.leds[LED_A].colour = Colour.GREEN
