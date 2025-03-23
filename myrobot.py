@@ -366,7 +366,7 @@ class MyRobot(Robot):
                     if distance < 400: #NEEDS TO BE TESTED
                         targetReached = self.goToBoxUltrasound()
                 else:
-                    self.turn(self.SPEED, abs(angleOut/4))
+                    self.lineUp(markerID)
 
                     #markerInfo = self.lineUp(markerID, roll)
 
