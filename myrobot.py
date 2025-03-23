@@ -296,7 +296,7 @@ class MyRobot(Robot):
                 self.targetFace = self.chooseBestMarker(markers)
                 self.hasTarget = True
 
-    def getSquareOn(self, targetInfo=None, targetID = None):
+    def goToBoxLong(self, targetInfo=None, targetID = None):
         #Allows for either marker or id
         if targetInfo != None:
             targetID = targetInfo.id
