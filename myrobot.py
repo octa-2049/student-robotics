@@ -290,7 +290,7 @@ class MyRobot(Robot):
             targetIDs = self.palletIDs
         else:
             targetIDs = self.outerHighriseIDs
-        while self.targetFace == []:
+        while not self.hasTarget:
             markers = self.look(targetIDs)
             if markers == []:
                 if timesTurned > self.TURN_FRACTION:
