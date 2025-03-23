@@ -18,6 +18,8 @@ class MyRobot(Robot):
         self.LEFT_MOTOR = self.motor_boards[self.MOTOR1].motors[0]
         self.RIGHT_MOTOR = self.motor_boards[self.MOTOR1].motors[1]
         self.MOTOR2 = "SR0TDC"  # For scissor lift
+        self.US_TRIGGER = 12 #Trigger pin for ultrasound
+        self.US_ECHO = 13 #Echo pin for ultrasound
 
         # Variables
 
