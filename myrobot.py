@@ -363,13 +363,8 @@ class MyRobot(Robot):
                     self.move(self.MAX_SPEED, distance / 4)
                     #May try to variate speed depending on distance to marker
                     self.sleep(0.5)
-                    if distance < 400:
-                        #NEED TO IMPLEMENT ULTRASOUND
-                        self.stop()
-                        print("Box reached")
-                        targetReached = True
-                elif angleOut < 0:
-                    self.turn(-1 * self.SPEED, abs(angleOut/4))
+                    if distance < 400: #NEEDS TO BE TESTED
+                        targetReached = self.goToBoxUltrasound()
                 else:
                     self.turn(self.SPEED, abs(angleOut/4))
 
