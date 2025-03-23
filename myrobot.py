@@ -387,7 +387,7 @@ class MyRobot(Robot):
         while not targetReached:
             markerInfo = self.look(markerID)
             if markerInfo == None:
-                self.turn(self.SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
                 # If box lost, set targetFace to [] again
                 # markerInfo = self.lineUp(markerID)
             else:
