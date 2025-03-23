@@ -85,8 +85,8 @@ class MyRobot(Robot):
 
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
-            self.leftMotor.power = speed
-            self.rightMotor.power = speed * self.SPEED_MULTIPLIER
+            self.LEFT_MOTOR.power = speed
+            self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
             self.isMoving = True
         else:
             distanceMoved = 0
