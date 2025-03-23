@@ -263,7 +263,7 @@ class MyRobot(Robot):
                         self.turn(self.MAX_SPEED, angleOut / 4)
             else:
                 self.linedUp = False
-                #return []
+                return None
 
     def lineUpWithoutEncoders(self, targetID):
         print("lining up without encoders")
