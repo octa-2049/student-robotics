@@ -346,7 +346,11 @@ class MyRobot(Robot):
         timesTurned = 0
         while not targetReached:
             markerInfo = self.look([markerID])
-            if markerInfo == []:
+            if not self.targetFound:
+                if timesTurned > self.TURN_FRACTION:
+                    self.resetVariables()
+                    # If box lost, reset variables
+                    return None
                 print("no marker found")
                 self.turn(self.SPEED, math.pi /40)  # NEEDS WAY TO EXIT IF NOT FOUND
                 # If box lost, set targetFace to [] again
