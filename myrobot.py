@@ -293,6 +293,7 @@ class MyRobot(Robot):
         while not self.hasTarget:
             markers = self.look(targetIDs)
             if markers == []:
+                # WAY TO EXIT IF NO MARKER FOUND:
                 if timesTurned > self.TURN_FRACTION:
                     self.randomMovement()
                     timesTurned = 0
