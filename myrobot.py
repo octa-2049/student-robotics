@@ -143,7 +143,6 @@ class MyRobot(Robot):
                 return markers  # see if any markers visible
             for mark in markers:
                 if mark.id in targetIDs:
-                    targetInfos.append(mark)
                     self.targetFound = True
                     return mark
         self.targetFound = False
