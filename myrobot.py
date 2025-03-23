@@ -310,6 +310,9 @@ class MyRobot(Robot):
         speed = 0.2
         targetReached = False
         self.linedUp = False
+        timesTurned = 0 #Times turned in a row without seeing a box
+        #If this exceeds self.fractionTurned then we have turned full
+        #360 degrees without finding a box and need to perform evasive manoeuvres
         while not targetReached:
             markerInfo = self.look([targetID])
             if markerInfo == []:  # If face not seen, turns on the spot
