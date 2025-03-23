@@ -173,7 +173,7 @@ class MyRobot(Robot):
         return []
 
     def printMarkerInfo(self, marker):
-        # Id, size
+        # ID, size
         print("Id: ", marker.id)
         print("Size: ", marker.size)
 
