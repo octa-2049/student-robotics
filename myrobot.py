@@ -350,8 +350,9 @@ class MyRobot(Robot):
             markerInfo = self.look(markerID)
             if markerInfo == None:
                 self.turn(self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
-                # If box lost, set targetFace to [] again
-                # markerInfo = self.lineUp(markerID)
+                if (start - self.time()) > 10: #NEED TO BE TESTED
+                    self.resetVariables()
+                    return None
             else:
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
