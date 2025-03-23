@@ -192,10 +192,6 @@ class MyRobot(Robot):
         print("Roll ", marker.orientation.roll)
         print("Actual yaw: " + str(self.getYawRad(marker)))
 
-    def triangulate(self):
-        #Find position relative to centre
-
-        return
 
     def roundRollDeg(self, roll):  # Check which orientation side is
         # Side either -180, 90, 0, 90, 180 degrees
