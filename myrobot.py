@@ -368,7 +368,17 @@ class MyRobot(Robot):
                 else:
                     self.lineUp(markerID)
 
-                    #markerInfo = self.lineUp(markerID, roll)
+    def goToBoxUltrasound(self):
+        start = self.time()
+        end = self.time()
+        self.move(self.MAX_SPEED)
+        while (start - end) < 5:
+            distance = self.getUltrasoundDistance()
+            if distance < 50:  # NEEDS TO BE TESTED
+                self.stop()
+                print("Box reached")
+                return True
+        return False
 
     def goToBoxWithoutEncoders(self, targetInfo):
         markerID = targetInfo.id
