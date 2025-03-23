@@ -341,7 +341,6 @@ class MyRobot(Robot):
                     speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
                     self.move(speed, distanceAway)
                     self.turn(-speed, math.pi / 2)
-                    #self.move(speed, distanceTowards)
                     self.goToBoxShort(targetInfo)
                     targetReached = True
                 else:
