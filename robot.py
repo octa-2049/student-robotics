@@ -36,8 +36,25 @@ def compCode(myRobot): #Code for actual robot
                 #need to remove id from target ids after being placed (maybe)
                 myRobot.resetVariables() #Start loop again to look for next box
 
-def testEncoders(robot):
-    my_motor_board = robot.motor_board
+def planB(myRobot):
+    while True:
+        if myRobot.isTargetBox:
+            if not myRobot.hasTarget:
+                myRobot.findBestPallet()
+            elif not myRobot.reachedTarget:
+                myRobot.goToBoxLong(myRobot.targetID)
+            else:
+                myRobot.grab()
+        else: #If target is a high rise
+            myRobot.goToHighRise()
+            myRobot.release()
+            myRobot.move(-myRobot.MAX_SPEED, 200)
+            #need to remove id from target ids after being placed
+            myRobot.resetVariables() #Start loop again to look for next box
+
+
+def testEncoders(myRobot):
+    my_motor_board = myRobot.motor_board
 
     total_speed0 = 0
     total_speed1 = 0
