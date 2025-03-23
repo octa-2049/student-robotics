@@ -343,6 +343,7 @@ class MyRobot(Robot):
             markerID = targetInfo.id
         print("Looking for " + str(markerID))
         targetReached = False
+        timesTurned = 0
         while not targetReached:
             markerInfo = self.look([markerID])
             if markerInfo == []:
