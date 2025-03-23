@@ -57,8 +57,6 @@ class MyRobot(Robot):
         # Booleans
         self.hasTarget = False
         self.targetFound = False
-        self.targetLost = False
-        self.faceFound = False
         self.reachedTarget = False
         self.linedUp = False
         self.isTurning = False
