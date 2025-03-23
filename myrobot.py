@@ -277,7 +277,7 @@ class MyRobot(Robot):
                     self.stop()
                     #return markerInfo
                 elif angleOut < 0:
-                    self.turn(-self.SPEED)
+                    self.turn(-self.MAX_SPEED)
                 else:
                     self.turn(self.MAX_SPEED)
             else:
