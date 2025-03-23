@@ -170,7 +170,7 @@ class MyRobot(Robot):
     def findFace(self, targetId, targetRoll):
         # To check if correct face side is seen (using roll)
         targetId = [targetId]
-        targetInfos = self.look(targetId)
+        targetInfos = self.lookAll(targetId)
         self.faceFound = False
         if targetInfos != []:
             for marker in targetInfos:
