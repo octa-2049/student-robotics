@@ -9,6 +9,8 @@ class MyRobot(Robot):
         self.PAUSE = 0.5 #Tme in seconds for sleep time
         self.MAX_SPEED = 0.5
         self.ANGLE_OUT = 0.3
+        self.TURN_FRACTION = 40
+        self.ANGLE_TURN = math.pi / self.TURN_FRACTION
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
