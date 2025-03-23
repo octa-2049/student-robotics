@@ -56,7 +56,6 @@ class MyRobot(Robot):
 
         # Booleans
         self.hasTarget = False
-        self.isTargetBox = True  # start by looking for box
         self.targetFound = False
         self.targetLost = False
         self.faceFound = False
