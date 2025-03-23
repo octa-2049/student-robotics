@@ -346,6 +346,7 @@ class MyRobot(Robot):
         markerID = targetInfo.id
         #roll = self.getRoll(targetInfo)
         targetReached = False
+        start = self.time()
         while not targetReached:
             markerInfo = self.look(markerID)
             if markerInfo == None:
