@@ -303,7 +303,6 @@ class MyRobot(Robot):
                 self.stop()
                 self.targetFace = self.chooseBestMarker(markers)
                 self.hasTarget = True
-        # return self.targetFace
 
     def goToBoxLong(self, targetInfo):
         targetID = targetInfo.id
