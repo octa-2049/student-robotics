@@ -282,7 +282,7 @@ class MyRobot(Robot):
                     self.turn(self.MAX_SPEED)
             else:
                 self.linedUp = False
-                #return None
+                return None
 
     def findBestMarker(self):
         # Finds next marker to go towards (either box or high rise)
