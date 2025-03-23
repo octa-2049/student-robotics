@@ -382,7 +382,7 @@ class MyRobot(Robot):
 
     def goToBoxWithoutEncoders(self, targetInfo):
         markerID = targetInfo.id
-        roll = self.getRoll(targetInfo)
+        #roll = self.getRoll(targetInfo)
         targetReached = False
         while not targetReached:
             markerInfo = self.findFace(markerID, roll)
