@@ -29,6 +29,7 @@ class MyRobot(Robot):
         self.palletIDs = localMarkerIDs[self.zone]
         self.outerHighriseIDs = [i for i in range(195, 198)]
         self.innerHighriseID = [199]
+        self.arenaMarkers = [i for i in range(0, 28)]
 
         # self.targetInfos = [] #All faces of id marker
         self.targetID = None
