@@ -161,7 +161,6 @@ class MyRobot(Robot):
                 if mark.id in targetIDs:
                     targetInfos.append(mark)
                     self.targetFound = True
-                    #return mark
         return targetInfos #returns either [] or all markers seen
 
     def findFace(self, targetId, targetRoll):
