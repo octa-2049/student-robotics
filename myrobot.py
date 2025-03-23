@@ -298,7 +298,6 @@ class MyRobot(Robot):
                     self.randomMovement()
                     timesTurned = 0
                 self.turn(self.MAX_SPEED, self.angleTurn)
-                # NEED WAY TO EXIT IF NO MARKER FOUND
                 timesTurned += 1
             else:
                 self.stop()
