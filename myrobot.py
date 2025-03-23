@@ -344,7 +344,6 @@ class MyRobot(Robot):
         print("Looking for " + str(markerID))
         targetReached = False
         while not targetReached:
-            #markerInfo = self.findFace(markerID, roll)
             markerInfo = self.look([markerID])
             if markerInfo == []:
                 print("no marker found")
