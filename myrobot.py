@@ -385,7 +385,7 @@ class MyRobot(Robot):
         #roll = self.getRoll(targetInfo)
         targetReached = False
         while not targetReached:
-            markerInfo = self.findFace(markerID, roll)
+            markerInfo = self.look(markerID)
             if markerInfo == None:
                 self.turn(self.SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
                 # If box lost, set targetFace to [] again
