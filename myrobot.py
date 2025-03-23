@@ -37,9 +37,6 @@ class MyRobot(Robot):
         self.hasTarget = False
         self.isTargetBox = True  # start by looking for box
         self.targetFound = False
-        self.targetLost = False  # When looking for target after certain time/turning 360 degrees
-        # Exit loop and switch targetLost to true to go back to
-        # Main code and find new target
         self.faceFound = False
         self.reachedTarget = False
         self.linedUp = False
