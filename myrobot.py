@@ -366,8 +366,6 @@ class MyRobot(Robot):
                         self.stop()
                     else:
                         self.move(self.MAX_SPEED)
-                elif angleOut < 0:
-                        self.turn(-self.SPEED)
                 else:
                     self.turn(self.SPEED)
                     #markerInfo = self.lineUpWithoutEncoders(markerID, roll)
