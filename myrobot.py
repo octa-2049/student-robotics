@@ -328,7 +328,6 @@ class MyRobot(Robot):
                 timesTurned += 1
             else:
                 self.stop()
-                #markerInfo = markerInfo[0]
                 if self.linedUp:
                     yaw = self.getYawRad(markerInfo)
                     if yaw > 0:
