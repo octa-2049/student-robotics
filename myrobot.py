@@ -22,10 +22,6 @@ class MyRobot(Robot):
         self.US_ECHO = 13 #Echo pin for ultrasound
 
         # Variables
-
-        self.leftMotor = self.motor_boards[self.MOTOR1].motors[0]
-        self.rightMotor = self.motor_boards[self.MOTOR1].motors[1]
-
         localMarkerIDs = [[i for i in range(100, 120)],
                           [i for i in range(120, 140)],
                           [i for i in range(140, 160)],
