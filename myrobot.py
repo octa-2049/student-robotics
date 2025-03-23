@@ -368,7 +368,6 @@ class MyRobot(Robot):
         self.linedUp = False
         timesTurned = 0 #Times turned in a row without seeing a box
         #If this exceeds self.fractionTurned then we have turned full
-        #360 degrees without finding a box and need to perform evasive manoeuvres
         #If box still not found then assumes box is lost and break loop
         while not squareOn:
             markerInfo = self.look([targetID])
