@@ -68,8 +68,8 @@ class MyRobot(Robot):
         self.grabbed = False
 
     def stop(self):
-        self.leftMotor.power = 0
-        self.rightMotor.power = 0
+        self.LEFT_MOTOR.power = 0
+        self.RIGHT_MOTOR.power = 0
         self.isMoving = False
         self.isTurning = False
 
