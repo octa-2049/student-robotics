@@ -256,7 +256,6 @@ class MyRobot(Robot):
                 if abs(angleOut) < self.ANGLE_OUT:
                     self.linedUp = True
                     self.stop()
-                    #return markerInfo
                 else:
                     if angleOut < 0:
                         self.turn(-self.SPEED, abs(angleOut/4))
