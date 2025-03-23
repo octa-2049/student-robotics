@@ -260,7 +260,7 @@ class MyRobot(Robot):
                     if angleOut < 0:
                         self.turn(-self.MAX_SPEED, abs(angleOut / 4))
                     else:
-                        self.turn(self.SPEED, angleOut/4)
+                        self.turn(self.MAX_SPEED, angleOut / 4)
             else:
                 self.linedUp = False
                 #return []
