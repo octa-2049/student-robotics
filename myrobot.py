@@ -15,6 +15,8 @@ class MyRobot(Robot):
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
+        self.LEFT_MOTOR = self.motor_boards[self.MOTOR1].motors[0]
+        self.RIGHT_MOTOR = self.motor_boards[self.MOTOR1].motors[1]
         self.MOTOR2 = "SR0TDC"  # For scissor lift
 
         # Variables
