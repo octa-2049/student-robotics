@@ -144,7 +144,7 @@ class MyRobot(Robot):
                     return mark
         return [] #returns either [] or first marker seen
 
-    def lookAll(self, targetIDs=None):
+    def findAll(self, targetIDs):
         #returns LIST
         self.sleep(self.PAUSE)
         self.stop()
