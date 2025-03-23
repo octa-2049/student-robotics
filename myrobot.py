@@ -296,9 +296,10 @@ class MyRobot(Robot):
                 self.targetFace = self.chooseBestMarker(markers)
                 self.hasTarget = True
 
-    def goToBoxLong(self, targetInfo):
-        targetID = targetInfo.id
-        #targetRoll = self.getRoll(targetInfo)
+    def getSquareOn(self, targetInfo=None, targetID = None):
+        #Allows for either marker or id
+        if targetInfo != None:
+            targetID = targetInfo.id
         speed = 0.2
         targetReached = False
         self.linedUp = False
