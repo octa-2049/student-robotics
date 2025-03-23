@@ -355,8 +355,7 @@ class MyRobot(Robot):
                 self.turn(self.MAX_SPEED, math.pi / 40)  # NEEDS WAY TO EXIT IF NOT FOUND
                 timesTurned += 1
             else:
-                #markerInfo = markerInfo[0]
-                angleOut = markerInfo.position.horizontal_angle
+                timesTurned = 0
                 print("Found marker")
                 if abs(angleOut) < self.ANGLE_OUT:
                     print("Moving straight")
