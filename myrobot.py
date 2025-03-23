@@ -137,10 +137,30 @@ class MyRobot(Robot):
                 if mark.id in targetIDs:
                     targetInfos.append(mark)
                     self.targetFound = True
-        if targetInfos != []:
-            return targetInfos[0]
-        else:
-            return [] #either [] or list of markers
+                    return mark
+        self.targetFound = False
+        return [] #returns either [] or first marker seen
+
+    def lookAll(self, targetIDs=None):
+        #returns LIST
+        self.sleep(self.PAUSE)
+        self.stop()
+        #print("Stopped")
+        self.sleep(self.PAUSE)
+        #print("Started")
+        targetInfos = []  # Multiple faces of same target stored here
+        # markers = None
+        markers = self.camera.see()
+        self.targetFound = False
+        if markers != None:
+            if targetIDs == None:  # If no target but just want to
+                return markers  # see if any markers visible
+            for mark in markers:
+                if mark.id in targetIDs:
+                    targetInfos.append(mark)
+                    self.targetFound = True
+                    #return mark
+        return targetInfos #returns either [] or all markers seen
 
     def findFace(self, targetId, targetRoll):
         # To check if correct face side is seen (using roll)
