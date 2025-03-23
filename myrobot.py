@@ -48,10 +48,8 @@ class MyRobot(Robot):
     def resetVariables(self):
         # Once box deposited, reset so that it restarts
         self.targetID = None
-        self.targetFace = []  # Specific face of certain marker
-        self.targetRoll = None  # Will be -90, 0, 90 or 180 degrees
-
-        # Booleans
+        self.targetFace = []
+        self.targetRoll = None
         self.hasTarget = False
         self.targetFound = False
         self.reachedTarget = False
