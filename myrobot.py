@@ -73,6 +73,16 @@ class MyRobot(Robot):
         self.isMoving = False
         self.isTurning = False
 
+    def getMotorPositions(self): #returns right and left motor positions
+        leftPos = float(self.arduino.command("n"))
+        rightPos = float(self.arduino.command("y"))
+        return leftPos, rightPos
+
+    def getUltrasoundDistance(self):
+        distance_mm = self.arduino.ultrasound_measure(self.US_TRIGGER, self.US_ECHO)
+        return distance_mm
+
+
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
             self.leftMotor.power = speed
