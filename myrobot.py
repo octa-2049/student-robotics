@@ -292,8 +292,13 @@ class MyRobot(Robot):
             targetIDs = self.outerHighriseIDs
         while self.targetFace == []:
             markers = self.look(targetIDs)
-            if markers == None:
-                self.turn(self.SPEED)  # NEED WAY TO EXIT IF NO MARKER FOUND
+            if markers == []:
+                if timesTurned > self.TURN_FRACTION:
+                    self.randomMovement()
+                    timesTurned = 0
+                self.turn(self.MAX_SPEED, self.angleTurn)
+                # NEED WAY TO EXIT IF NO MARKER FOUND
+                timesTurned += 1
             else:
                 self.stop()
                 self.targetFace = self.chooseBestMarker(markers)
