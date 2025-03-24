@@ -283,13 +283,13 @@ class MyRobot(Robot):
         timesTurned = 0 #Times turned in a row
         targetIDs = self.palletIDs
         while not self.hasTarget:
-            markers = self.look(targetIDs)
+            markers = self.findAll(targetIDs)
             if markers == []:
-                # WAY TO EXIT IF NO MARKER FOUND:
+                #DO SOMETHING IF NO MARKER FOUND:
                 if timesTurned > self.TURN_FRACTION:
                     self.randomMovement()
                     timesTurned = 0
-                self.turn(self.MAX_SPEED, self.angleTurn)
+                self.turn(self.MAX_SPEED, self.ANGLE_TURN)
                 timesTurned += 1
             else:
                 self.stop()
@@ -324,9 +324,13 @@ class MyRobot(Robot):
                     #May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 400: #NEEDS TO BE TESTED
-                        targetReached = self.goToMarkerUltrasound(50)
+                        self.move(self.MAX_SPEED, distance * 0.95)
+                        self.reachedTarget = True
+                        return None
+                        #targetReached = self.goToMarkerUltrasound(50)
                 else:
                     self.lineUp(markerID)
+        self.reachedTarget = True
 
     def goToMarkerUltrasound(self, distanceAway):
         start = self.time()
