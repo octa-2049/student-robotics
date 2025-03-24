@@ -21,6 +21,8 @@ class MyRobot(Robot):
         self.MOTOR2 = "SR0TDC"  # For scissor lift
         self.US_TRIGGER = 12 #Trigger pin for ultrasound
         self.US_ECHO = 13 #Echo pin for ultrasound
+        self.SWITCH_LEFT = 10 #Left microswitch
+        self.SWITCH_RIGHT = 11 #Right microswitch
 
         # Variables
         localMarkerIDs = [[i for i in range(100, 120)],
@@ -79,9 +81,10 @@ class MyRobot(Robot):
         return distance_mm
 
     def isHoldingBox(self): #NEED TO CHECK IF RIGHT WAY ROUND
-        microSwitchLeft = self.arduino.pins[10].digital_read()
-        microSwitchRight = self.arduino.pins[11].digital_read()
-        return not microSwitchLeft and not microSwitchRight
+        #When being pressed, variables are false
+        microSwitchLeft = not self.arduino.pins[self.SWITCH_LEFT].digital_read()
+        microSwitchRight = not self.arduino.pins[self.SWITCH_RIGHT].digital_read()
+        return microSwitchLeft and microSwitchRight
 
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
@@ -433,8 +436,8 @@ class MyRobot(Robot):
         grabbed = False
         while not grabbed:
             print(angle)
-            microSwitchLeft = self.arduino.pins[10].digital_read()
-            microSwitchRight = self.arduino.pins[11].digital_read()
+            microSwitchLeft = self.arduino.pins[self.SWITCH_LEFT].digital_read()
+            microSwitchRight = self.arduino.pins[self.SWITCH_RIGHT].digital_read()
             if angle > 1:
                 print("no box grabbed")
                 #self.kch.leds[LED_A].colour = Colour.RED

@@ -1,20 +1,23 @@
 from myrobot import MyRobot
-import math
 robot = MyRobot()
 
 ARDUINO_SN = ""
 
 
 def test(myRobot):
-    markers = myRobot.look()
     while True:
-        markers = myRobot.look()
-        if markers != []:
-            myRobot.stop()
+        if not myRobot.hasTarget:
+            myRobot.findBestPallet()
+        elif not myRobot.reachedTarget:
             return myRobot.goToBoxLong(myRobot.targetID)
 
-        else:
-            myRobot.turn(myRobot.MAX_SPEED)
+        # markers = myRobot.look()
+        # if markers != []:
+        #     myRobot.stop()
+        #     return myRobot.goToBoxLong(myRobot.targetID)
+        #
+        # else:
+        #     myRobot.turn(myRobot.MAX_SPEED)
             #robot.sleep(1)
 
 def compCode(myRobot): #Code for actual robot
@@ -75,4 +78,4 @@ def testEncoders(myRobot):
 
 
 #testEncoders(robot)
-#test(robot)
+test(robot)
