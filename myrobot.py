@@ -21,8 +21,9 @@ class MyRobot(Robot):
         self.MOTOR2 = "SR0TDC"  # For scissor lift
         self.US_TRIGGER = 12 #Trigger pin for ultrasound
         self.US_ECHO = 13 #Echo pin for ultrasound
-        self.SWITCH_LEFT = 10 #Left microswitch
-        self.SWITCH_RIGHT = 11 #Right microswitch
+        self.GRAB_SERVO = self.servo_board.servos[0].position
+        self.SWITCH_LEFT = self.arduino.pins[10] #Left microswitch
+        self.SWITCH_RIGHT = self.arduino.pins[11] #Right microswitch
 
         # Variables
         localMarkerIDs = [[i for i in range(100, 120)],
@@ -440,8 +441,8 @@ class MyRobot(Robot):
         grabbed = False
         while not grabbed:
             print(angle)
-            microSwitchLeft = self.arduino.pins[self.SWITCH_LEFT].digital_read()
-            microSwitchRight = self.arduino.pins[self.SWITCH_RIGHT].digital_read()
+            microSwitchLeft = self.SWITCH_LEFT.digital_read()
+            microSwitchRight = self.SWITCH_RIGHT.digital_read()
             if angle > 1:
                 print("no box grabbed")
                 #self.kch.leds[LED_A].colour = Colour.RED
@@ -451,12 +452,12 @@ class MyRobot(Robot):
                 #self.kch.leds[LED_A].colour = Colour.GREEN
                 self.grabbed = True
                 grabbed = True
-            self.servo_board.servos[0].position = angle
+            self.GRAB_SERVO = angle
             angle += interval
             self.sleep(0.25)
 
     def release(self): #doesn't work
-        self.servo_board.servos[0].position = -1
+        self.GRAB_SERVO = -1
 
     def scissorLift(self, height, lift_speed = 0.1):
         target_height = height
