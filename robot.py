@@ -4,11 +4,16 @@ robot = MyRobot()
 def test(myRobot):
     while True:
         if not myRobot.hasTarget:
+            print("FINDING TARGET")
             myRobot.findBestPallet()
         elif not myRobot.reachedTarget:
-            myRobot.goToBoxStraight(myRobot.targetID)
-        else:
+            print("GOING TO BOX")
+            myRobot.goToBoxLong(myRobot.targetID)
+        elif not myRobot.isHoldingBox():
+            print("GRABBING BOX")
             myRobot.grab()
+        else:
+            myRobot.move(-myRobot.MAX_SPEED, 300)
             return None
 
 def compCode(myRobot): #Code for actual robot
@@ -90,4 +95,14 @@ def scissorLift(height, lift_speed_down, lift_speed_up):
     robot.motor_boards["SR0TDC"].motors[0].power = 0
     #robot.motor_boards["SR0TDC"].motors[1].power = 0
 
+
+def motors(robot):
+    robot.motor_boards["SR0TDC"].motors[0].power = 0.7
+    robot.sleep(5)
+    robot.motor_boards["SR0TDC"].motors[0].power = 0
+
+def testServo(robot):
+
+
 test(robot)
+#motors(robot)
