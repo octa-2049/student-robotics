@@ -1,16 +1,14 @@
 import math
 from sr.robot3 import *
 
-
-# noinspection PyComparisonWithNone
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
-        self.PAUSE = 0.5 #Tme in seconds for sleep time
-        self.MAX_SPEED = 0.5
-        self.ANGLE_OUT = 0.3
-        self.TURN_FRACTION = 40
+        self.PAUSE = 0.3 #Tme in seconds for sleep time
+        self.MAX_SPEED = 0.4
+        self.ANGLE_OUT = 0.2
+        self.TURN_FRACTION = 20
         self.ANGLE_TURN = math.pi / self.TURN_FRACTION
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
@@ -18,7 +16,8 @@ class MyRobot(Robot):
         self.MOTOR1 = "SR0REB"  # For wheels
         self.LEFT_MOTOR = self.motor_boards[self.MOTOR1].motors[0]
         self.RIGHT_MOTOR = self.motor_boards[self.MOTOR1].motors[1]
-        self.MOTOR2 = "SR0TDC"  # For scissor lift
+        #self.MOTOR2 = "SR0TDC"  # For scissor lift
+        #self.SCISSOR = self.motor_boards[self.MOTOR2].motors[0].power
         self.US_TRIGGER = 12 #Trigger pin for ultrasound
         self.US_ECHO = 13 #Echo pin for ultrasound
         self.GRAB_SERVO = self.servo_board.servos[0].position
@@ -72,7 +71,7 @@ class MyRobot(Robot):
         self.isMoving = False
         self.isTurning = False
 
-    def getMotorPositions(self): #returns right and left motor positions
+    def getWheelPositions(self): #returns right and left motor positions
         leftPos = float(self.arduino.command("n"))
         rightPos = float(self.arduino.command("y"))
         return leftPos, rightPos
@@ -81,11 +80,37 @@ class MyRobot(Robot):
         distance_mm = self.arduino.ultrasound_measure(self.US_TRIGGER, self.US_ECHO)
         return distance_mm
 
+    def getCos(self, angle):
+        return round(1 - ((angle ** 2) / 2) + ((angle ** 4) / 24), 2)
+
+    def roundRollDeg(self, roll):  # Check which orientation side is
+        # Side either -180, 90, 0, 90, 180 degrees
+        rollDeg = math.degrees(roll)
+        rollDeg = int(90 * round(float(rollDeg) / 90))
+        if rollDeg == -180:
+            rollDeg = 180
+        return rollDeg
+
+    def getRoll(self, marker):
+        return self.roundRollDeg(marker.orientation.roll)
+
+    def getYawRad(self, markerInfo):
+        # Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
+        roll_cache = self.getRoll(markerInfo)
+        if roll_cache < 0 or roll_cache == 180:
+            is_roll_negative = -1
+        else:  # If yaw/pitch are switched
+            is_roll_negative = 1
+        if roll_cache == 0 or roll_cache == 180:  # use yaw if "right" way up
+            return is_roll_negative * markerInfo.orientation.yaw
+        else:  # use pitch if box is on its "side"
+            return is_roll_negative * markerInfo.orientation.pitch
+
     def isHoldingBox(self): #NEED TO CHECK IF RIGHT WAY ROUND
         #When being pressed, variables are false
-        microSwitchLeft = not self.arduino.pins[self.SWITCH_LEFT].digital_read()
-        microSwitchRight = not self.arduino.pins[self.SWITCH_RIGHT].digital_read()
-        return microSwitchLeft and microSwitchRight
+        microSwitchLeft = not self.SWITCH_LEFT.digital_read()
+        microSwitchRight = not self.SWITCH_RIGHT.digital_read()
+        return microSwitchLeft or microSwitchRight
 
     def move(self, speed, distance=None):
         if distance == None:  # if no distance to move is provided move until stopped
@@ -202,31 +227,10 @@ class MyRobot(Robot):
         print("Roll ", marker.orientation.roll)
         print("Actual yaw: " + str(self.getYawRad(marker)))
 
-    def roundRollDeg(self, roll):  # Check which orientation side is
-        # Side either -180, 90, 0, 90, 180 degrees
-        rollDeg = math.degrees(roll)
-        rollDeg = int(90 * round(float(rollDeg) / 90))
-        if rollDeg == -180:
-            rollDeg = 180
-        return rollDeg
-
-    def getRoll(self, marker):
-        return self.roundRollDeg(marker.orientation.roll)
-
-    def getYawRad(self, markerInfo):
-        # Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
-        roll_cache = self.roundRollDeg(markerInfo.orientation.roll)
-        if roll_cache < 0 or roll_cache == 180:
-            is_roll_negative = -1
-        else:  # If yaw/pitch are switched
-            is_roll_negative = 1
-        if roll_cache == 0 or roll_cache == 180:  # use yaw if "right" way up
-            return is_roll_negative * markerInfo.orientation.yaw
-        else:  # use pitch if box is on its "side"
-            return is_roll_negative * markerInfo.orientation.pitch
-
     def chooseBestFace(self, markers):
         # based on which side closest to being square on
+        if len(markers) < 1:
+            return markers
         bestSide = markers[0]
         for mark in markers:
             if self.getYawRad(bestSide) > self.getYawRad(mark):
@@ -246,15 +250,15 @@ class MyRobot(Robot):
         # Lines up on specific face,if marker goes out of vision breaks loop
         self.linedUp = False
         while not self.linedUp:
-            markerInfo = self.look(targetID)
+            markerInfo = self.look([targetID])
             if markerInfo != []:
                 angleOut = markerInfo.position.horizontal_angle
-                if abs(angleOut) < self.ANGLE_OUT:
+                if -self.ANGLE_OUT < angleOut < self.ANGLE_OUT:
                     self.linedUp = True
                     self.stop()
                 else:
-                    if angleOut < 0:
-                        self.turn(-self.MAX_SPEED, abs(angleOut / 4))
+                    if angleOut < 0: #MORE POSITIVE THAN NEGATIVE
+                        self.turn(-self.MAX_SPEED, -angleOut / 4)
                     else:
                         self.turn(self.MAX_SPEED, angleOut / 4)
             else:
@@ -265,7 +269,7 @@ class MyRobot(Robot):
         print("lining up without encoders")
         self.linedUp = False
         while not self.linedUp:
-            markerInfo = self.look(targetID)
+            markerInfo = self.look([targetID])
             if markerInfo != []:
                 angleOut = markerInfo.position.horizontal_angle
                 if abs(angleOut) < self.ANGLE_OUT:
@@ -280,9 +284,13 @@ class MyRobot(Robot):
                 self.linedUp = False
                 return None
 
-    def findBestPallet(self):
+    def findBestMarker(self):
+        if self.isTargetBox:
+            targetIDs = self.palletIDs
+        else:
+            targetIDs = self.outerHighriseIDs
         timesTurned = 0 #Times turned in a row
-        targetIDs = self.palletIDs
+
         while not self.hasTarget:
             markers = self.findAll(targetIDs)
             if markers == []:
@@ -313,7 +321,7 @@ class MyRobot(Robot):
                     # If box lost, reset variables
                     return None
                 print("no marker found")
-                self.turn(self.MAX_SPEED, math.pi / 40)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
                 timesTurned += 1
             else:
                 timesTurned = 0
@@ -324,8 +332,8 @@ class MyRobot(Robot):
                     self.move(self.MAX_SPEED, distance / 4)
                     #May try to variate speed depending on distance to marker
                     self.sleep(0.5)
-                    if distance < 400: #NEEDS TO BE TESTED
-                        self.move(self.MAX_SPEED, distance * 0.95)
+                    if distance < 800: #NEEDS TO BE TESTED
+                        self.move(self.MAX_SPEED, distance * 1.05)
                         self.reachedTarget = True
                         return None
                         #targetReached = self.goToMarkerUltrasound(50)
@@ -390,23 +398,29 @@ class MyRobot(Robot):
                 self.stop()
                 if self.linedUp:
                     yaw = self.getYawRad(markerInfo)
-                    if yaw > 0:
-                        speed = -speed
-                    yaw = abs(yaw)
                     distance = markerInfo.position.distance
-                    distanceAway = math.cos(yaw) * distance
-                    self.turn(speed, yaw)
-                    speed = abs(speed)  # To make sure robot goes forward/turns 90 degrees clockwise
-                    self.move(speed, distanceAway)
-                    self.turn(-speed, math.pi / 2)
+                    if distance > 1500:
+                        self.move(self.MAX_SPEED, distance - 1500)
+                    elif yaw > 0:
+                        distanceAway = self.getCos(yaw) * distance
+                        print(distanceAway, self.getCos(yaw), distance)
+                        self.turn(-self.MAX_SPEED, yaw)
+                        self.move(self.MAX_SPEED, distanceAway)
+                        self.turn(self.MAX_SPEED, math.pi / 2)
+                    else: #If yaw negative
+                        distanceAway = self.getCos(-yaw) * distance
+                        print(distanceAway, self.getCos(-yaw), distance)
+                        self.turn(self.MAX_SPEED, -yaw)
+                        self.move(self.MAX_SPEED, distanceAway)
+                        self.turn(-self.MAX_SPEED, math.pi / 2)
                     squareOn = True
                 else:
                     self.lineUp(targetID)
 
     def randomMovement(self): #Unfinished
-        self.move(self.MAX_SPEED, 0.2)
+        self.move(self.MAX_SPEED, 200)
         self.turn(self.MAX_SPEED, math.pi / 4)
-        self.move(self.MAX_SPEED, 0.2)
+        self.move(-self.MAX_SPEED, 200)
 
     def goToHighRise(self, markerID):
         print("Looking for " + str(markerID))
@@ -419,7 +433,7 @@ class MyRobot(Robot):
                     self.randomMovement()
                     timesTurned = 0
                 print("no marker found")
-                self.turn(self.MAX_SPEED, math.pi / 40)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
                 timesTurned += 1
             else:
                 timesTurned = 0
@@ -430,8 +444,11 @@ class MyRobot(Robot):
                     self.move(self.MAX_SPEED, distance / 4)
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
-                    if distance < 400:  # NEEDS TO BE TESTED
-                        targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
+                    if distance < 800:  # NEEDS TO BE TESTED
+                        self.move(self.MAX_SPEED, distance - 200)
+                        self.reachedTarget = True
+                        targetReached = True
+                        #targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
                 else:
                     self.lineUp(markerID)
 
@@ -447,16 +464,25 @@ class MyRobot(Robot):
                 print("no box grabbed")
                 #self.kch.leds[LED_A].colour = Colour.RED
                 self.grabbed = False
+                self.reachedTarget = False
                 break
-            if not microSwitchLeft and not microSwitchRight:
+            if not microSwitchLeft or not microSwitchRight:
                 #self.kch.leds[LED_A].colour = Colour.GREEN
                 self.grabbed = True
                 grabbed = True
             self.GRAB_SERVO = angle
             angle += interval
             self.sleep(0.25)
+        self.GRAB_SERVO = -1
 
-    def release(self): #doesn't work
+    def release(self):
+        # angle = 0.8
+        # interval = -0.1
+        # while -1 < angle < 1:
+        #     print(angle)
+        #     self.GRAB_SERVO = angle
+        #     angle += interval
+        #     self.sleep(0.1)
         self.GRAB_SERVO = -1
 
     def scissorLift(self, height, lift_speed = 0.1):
@@ -476,3 +502,4 @@ class MyRobot(Robot):
                 self.motor_boards["SR0TDC"].motors[1].power = lift_speed
         self.motor_boards["SR0TDC"].motors[0].power = 0
         self.motor_boards["SR0TDC"].motors[1].power = 0
+
