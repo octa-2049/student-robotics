@@ -22,11 +22,9 @@ def planB(myRobot):
                 palletID = myRobot.targetID
                 myRobot.isTargetBox = False
                 myRobot.resetVariables()
-
         elif not myRobot.isHoldingBox:
             myRobot.isTargetBox = True
             myRobot.resetVariables()
-
         else:  # If target is a high rise
             if not myRobot.hasTarget:
                 print("Finding high rise marker")
