@@ -105,7 +105,7 @@ class MyRobot(Robot):
         return microSwitchLeft or microSwitchRight
 
     def isLinedUp(self, markerInfo):
-        #Returns if lined up or not
+        #Returns if lined up or not using markerinfo
         return abs(markerInfo.position.horizontal_angle) < self.ANGLE_OUT
 
     def move(self, speed, distance=None):
