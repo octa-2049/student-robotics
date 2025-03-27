@@ -56,17 +56,12 @@ class MyRobot(Robot):
         self.hasTarget = False
         self.targetFound = False
         self.reachedTarget = False
-        self.linedUp = False
-        self.isTurning = False
-        self.isMoving = False
         self.scissorLiftUp = False
         self.grabbed = False
 
     def stop(self):
         self.LEFT_MOTOR.power = 0
         self.RIGHT_MOTOR.power = 0
-        self.isMoving = False
-        self.isTurning = False
 
     def getWheelPositions(self): #returns right and left motor positions
         leftPos = float(self.arduino.command("n"))
@@ -109,11 +104,15 @@ class MyRobot(Robot):
         microSwitchRight = not self.SWITCH_RIGHT.digital_read()
         return microSwitchLeft or microSwitchRight
 
+    def isLinedUp(self, markerInfo):
+        #Returns if lined up or not
+        return abs(markerInfo.position.horizontal_angle) < self.ANGLE_OUT
+
     def move(self, speed, distance=None):
+        print("Moving", speed, distance)
         if distance == None:  # if no distance to move is provided move until stopped
             self.LEFT_MOTOR.power = speed
             self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
-            self.isMoving = True
         else:
             distanceMoved = 0
             startLeftPos = float(self.arduino.command("n"))  # arbitrary value to move left wheel motor
@@ -136,7 +135,6 @@ class MyRobot(Robot):
         if angle == None:
             self.LEFT_MOTOR.power = speed
             self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
-            self.isTurning = True
 
         else:
             angleToTurn = angle * self.WIDTH / self.DIAMETER
@@ -245,13 +243,13 @@ class MyRobot(Robot):
 
     def lineUp(self, targetID):
         # Lines up on specific face,if marker goes out of vision breaks loop
-        self.linedUp = False
-        while not self.linedUp:
+        linedUp = False
+        while not linedUp:
             markerInfo = self.look([targetID])
             if markerInfo != []:
                 angleOut = markerInfo.position.horizontal_angle
-                if -self.ANGLE_OUT < angleOut < self.ANGLE_OUT:
-                    self.linedUp = True
+                if self.isLinedUp(markerInfo):
+                    linedUp = True
                     self.stop()
                 else:
                     if angleOut < 0: #MORE POSITIVE THAN NEGATIVE
@@ -259,26 +257,24 @@ class MyRobot(Robot):
                     else:
                         self.turn(self.MAX_SPEED, angleOut / 4)
             else:
-                self.linedUp = False
                 return None
 
     def lineUpWithoutEncoders(self, targetID):
         print("lining up without encoders")
-        self.linedUp = False
-        while not self.linedUp:
+        linedUp = False
+        while not linedUp:
             markerInfo = self.look([targetID])
             if markerInfo != []:
                 angleOut = markerInfo.position.horizontal_angle
-                if abs(angleOut) < self.ANGLE_OUT:
+                if self.isLinedUp(markerInfo):
                     print("lined up")
-                    self.linedUp = True
+                    linedUp = True
                     self.stop()
                 elif angleOut < 0:
                     self.turn(-self.MAX_SPEED)
                 else:
                     self.turn(self.MAX_SPEED)
             else:
-                self.linedUp = False
                 return None
 
     def findBestMarker(self):
@@ -323,7 +319,7 @@ class MyRobot(Robot):
             else:
                 timesTurned = 0
                 print("Found marker")
-                if self.linedUp:
+                if self.isLinedUp(markerInfo):
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.MAX_SPEED, distance / 4)
@@ -358,13 +354,14 @@ class MyRobot(Robot):
             if markerInfo == None:
                 self.turn(self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
                 if (start - self.time()) > 10: #NEED TO BE TESTED
+                    print("No box found")
                     self.resetVariables()
                     return None
             else:
                 start = self.time()
                 angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
-                if self.linedUp:
+                if self.isLinedUp(markerInfo):
                     print("linedUp")
                     distance = markerInfo.position.distance
                     if distance < 300:
@@ -379,7 +376,6 @@ class MyRobot(Robot):
         #Allows for only ID
         speed = 0.2
         squareOn = False
-        self.linedUp = False
         timesTurned = 0 #Times turned in a row without seeing a box
         #If this exceeds self.fractionTurned then we have turned full
         #If box still not found then assumes box is lost and break loop
@@ -393,7 +389,7 @@ class MyRobot(Robot):
                 timesTurned += 1
             else:
                 self.stop()
-                if self.linedUp:
+                if self.isLinedUp(markerInfo):
                     yaw = self.getYawRad(markerInfo)
                     distance = markerInfo.position.distance
                     if distance > 1500:
@@ -435,7 +431,7 @@ class MyRobot(Robot):
             else:
                 timesTurned = 0
                 print("Found marker")
-                if self.linedUp:
+                if self.isLinedUp(markerInfo):
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.MAX_SPEED, distance / 4)
