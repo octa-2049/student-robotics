@@ -45,9 +45,6 @@ class MyRobot(Robot):
         self.targetFound = False
         self.faceFound = False
         self.reachedTarget = False
-        self.linedUp = False
-        self.isTurning = False
-        self.isMoving = False
         self.scissorLiftUp = False
         self.grabbed = False
 
