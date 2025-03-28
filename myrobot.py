@@ -458,8 +458,8 @@ class MyRobot(Robot):
         grabbed = False
         while not grabbed:
             print(angle)
-            microSwitchLeft = self.SWITCH_LEFT.digital_read()
-            microSwitchRight = self.SWITCH_RIGHT.digital_read()
+            #microSwitchLeft = self.SWITCH_LEFT.digital_read()
+            #microSwitchRight = self.SWITCH_RIGHT.digital_read()
             if angle >= 1:
                 print("no box grabbed")
                 self.grabbed = False
@@ -467,16 +467,18 @@ class MyRobot(Robot):
                 self.release()
                 self.resetVariables()
                 break
-            if not microSwitchLeft or not microSwitchRight:
+            if self.isHoldingBox():
                 print("grabbing")
                 self.grabbed = True
                 grabbed = True
+                self.GRAB_SERVO.position = 1
             self.GRAB_SERVO.position = angle
             angle += interval
             self.sleep(0.1)
 
     def release(self):
         self.GRAB_SERVO.position = -1
+        self.sleep(0.1)
 
     def scissorLift(self, height, lift_speed=0.1):
         target_height = height
