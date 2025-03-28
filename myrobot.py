@@ -336,7 +336,7 @@ class MyRobot(Robot):
                     self.sleep(0.5)
                     if distance < 600:  # NEEDS TO BE TESTED
                         self.move(self.MAX_SPEED, distance * 1.05)
-                        self.reachedTarget = True
+                        self.reachedTarget = self.goToMarkerUltrasound(65)
                         return None
                         #targetReached = self.goToMarkerUltrasound(50)
                 else:
