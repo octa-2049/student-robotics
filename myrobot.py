@@ -478,7 +478,7 @@ class MyRobot(Robot):
 
     def release(self):
         self.GRAB_SERVO.position = -1
-        self.sleep(0.1)
+        self.sleep(0.5)
 
     def scissorLift(self, height, lift_speed=0.1):
         target_height = height
