@@ -338,7 +338,6 @@ class MyRobot(Robot):
                         self.move(self.MAX_SPEED, distance * 1.05)
                         self.reachedTarget = self.goToMarkerUltrasound(65)
                         return None
-                        #targetReached = self.goToMarkerUltrasound(50)
                 else:
                     self.lineUp(markerID)
 
