@@ -1,7 +1,6 @@
 import math
 from sr.robot3 import *
 
-
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
@@ -98,7 +97,7 @@ class MyRobot(Robot):
     def getCos(self, angle):
         return round(1 - ((angle ** 2) / 2) + ((angle ** 4) / 24), 2)
 
-    def getRoll(self, marker):
+    def getRollDeg(self, marker):
         roll = marker.orientation.roll
         # Side either -180, 90, 0, 90, 180 degrees
         rollDeg = math.degrees(roll)
@@ -109,7 +108,7 @@ class MyRobot(Robot):
 
     def getYawRad(self, markerInfo):
         # Pitch/yaw switch when box rotated 90 degrees so use roll to calculate actual yaw
-        roll_cache = self.getRoll(markerInfo)
+        roll_cache = self.getRollDeg(markerInfo)
         if roll_cache < 0 or roll_cache == 180:
             is_roll_negative = -1
         else:  # If yaw/pitch are switched
@@ -128,6 +127,9 @@ class MyRobot(Robot):
     def isLinedUp(self, markerInfo):
         #Returns if lined up or not
         return abs(markerInfo.position.horizontal_angle) < self.ANGLE_OUT
+
+    def isGoodFace(self, marker):
+        return abs(self.getYawRad(marker)) < self.VALID_YAW
 
     def move(self, speed, distance=None):
         print("Moving", speed, distance)
@@ -234,11 +236,11 @@ class MyRobot(Robot):
         # based on which side closest to being square on
         if len(markers) == 0:
             return []
-        bestSide = markers[0]
+        bestFace = markers[0]
         for mark in markers:
-            if self.getYawRad(bestSide) > self.getYawRad(mark):
-                bestSide = mark
-        return bestSide
+            if self.getYawRad(bestFace) > self.getYawRad(mark):
+                bestFace = mark
+        return bestFace
 
     def chooseBestMarker(self, markers):
         bestMarker = markers[0]
@@ -248,9 +250,6 @@ class MyRobot(Robot):
             if markerDistance < bestDistance:
                 bestMarker = marker
         return bestMarker
-        # self.targetID = bestMarker.id
-        # self.targetFace = bestMarker
-        # self.hasTarget = True
 
     def findBestMarker(self):
         if self.isTargetBox:
