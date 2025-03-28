@@ -1,6 +1,7 @@
 import math
 from sr.robot3 import *
 
+
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
@@ -11,6 +12,7 @@ class MyRobot(Robot):
         self.TURN_FRACTION = 20
         self.ANGLE_TURN = math.pi / self.TURN_FRACTION
         self.VALID_YAW = math.pi / 4  # How much angle we allow before not considering face
+        self.ULTRA_CLOSE = 70
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
@@ -85,7 +87,7 @@ class MyRobot(Robot):
         self.LEFT_MOTOR.power = 0
         self.RIGHT_MOTOR.power = 0
 
-    def getWheelPositions(self): #returns right and left motor positions
+    def getWheelPositions(self):  # returns right and left motor positions
         leftPos = float(self.arduino.command("n"))
         rightPos = float(self.arduino.command("y"))
         return leftPos, rightPos
@@ -118,18 +120,22 @@ class MyRobot(Robot):
         else:  # use pitch if box is on its "side"
             return is_roll_negative * markerInfo.orientation.pitch
 
-    def isHoldingBox(self): #NEED TO CHECK IF RIGHT WAY ROUND
-        #When being pressed, variables are false
+    def isHoldingBox(self):
+        # When being pressed, variables are false
         microSwitchLeft = not self.SWITCH_LEFT.digital_read()
         microSwitchRight = not self.SWITCH_RIGHT.digital_read()
         return microSwitchLeft or microSwitchRight
 
     def isLinedUp(self, markerInfo):
-        #Returns if lined up or not
+        # Returns if lined up or not
         return abs(markerInfo.position.horizontal_angle) < self.ANGLE_OUT
 
     def isGoodFace(self, marker):
         return abs(self.getYawRad(marker)) < self.VALID_YAW
+
+    def isBoxNear(self):
+        ultraDist = self.getUltrasoundDistance()
+        return ultraDist < self.ULTRA_CLOSE
 
     def move(self, speed, distance=None):
         print("Moving", speed, distance)
@@ -145,7 +151,7 @@ class MyRobot(Robot):
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
                 rightDiff = abs(startRightPos - currentRightPos)
-                #leftDiff = rightDiff  # Needs to be deleted when right encoder works
+                # leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
                 distanceMoved = avgDiff * self.DIAMETER * math.pi
                 distanceMoved = round(distanceMoved, -2)
@@ -154,13 +160,13 @@ class MyRobot(Robot):
             self.stop()
 
     def turn(self, speed, angle=None):
-        # When speed positive robot turns ANTIclockwise
+        # When speed positive robot turns ANTI-clockwise
         if angle == None:
             self.LEFT_MOTOR.power = -speed
             self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
         else:
             angleToTurn = angle * self.WIDTH / self.DIAMETER
-            #angleToTurn in arbitrary units 1 = 1 complete revolution of wheel
+            # angleToTurn in arbitrary units 1 = 1 complete revolution of wheel
             angleTurned = 0
             startLeftPos = float(self.arduino.command("n"))
             startRightPos = float(self.arduino.command("y"))
@@ -169,7 +175,7 @@ class MyRobot(Robot):
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
                 rightDiff = abs(startRightPos - currentRightPos)
-                #leftDiff = rightDiff  # Needs to be deleted when right encoder works
+                # leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
                 angleTurned = (avgDiff * 2 * math.pi)
                 self.LEFT_MOTOR.power = speed
@@ -182,12 +188,12 @@ class MyRobot(Robot):
         self.move(self.MAX_SPEED, 200)
 
     def findOne(self, targetIDs=None):
-        #returns SINGLE MARKER NOT LIST
+        # returns SINGLE MARKER NOT LIST
         self.sleep(self.PAUSE)
         self.stop()
-        #print("Stopped")
+        # print("Stopped")
         self.sleep(self.PAUSE)
-        #print("Started")
+        # print("Started")
         markers = self.camera.see()
         targetInfos = []
         self.targetFound = False
@@ -203,12 +209,12 @@ class MyRobot(Robot):
         return singleFace  # returns either [] or first marker seen
 
     def findAll(self, targetIDs):
-        #returns LIST
+        # returns LIST
         self.sleep(self.PAUSE)
         self.stop()
-        #print("Stopped")
+        # print("Stopped")
         self.sleep(self.PAUSE)
-        #print("Started")
+        # print("Started")
         targetInfos = []  # Multiple faces of same target stored here
         markers = self.camera.see()
         self.targetFound = False
@@ -256,14 +262,14 @@ class MyRobot(Robot):
             targetIDs = self.palletIDs
         else:
             targetIDs = self.outerHighriseIDs
-        timesTurned = 0 #Times turned in a row
+        timesTurned = 0  # Times turned in a row
 
         while not self.hasTarget:
             markers = self.findAll(targetIDs)
             # NEEDS TO USE FIND ALL NOT FIND ONE OTHERWISE CANNOT CHOOSE WHICH
             # MARKER BEST ONE
             if markers == []:
-                #DO SOMETHING IF NO MARKER FOUND:
+                # DO SOMETHING IF NO MARKER FOUND:
                 if timesTurned > self.TURN_FRACTION:
                     self.randomMovement1()
                     timesTurned = 0
@@ -332,23 +338,23 @@ class MyRobot(Robot):
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     self.move(self.MAX_SPEED, distance / 4)
-                    #May try to variate speed depending on distance to marker
+                    # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 600:  # NEEDS TO BE TESTED
                         self.move(self.MAX_SPEED, distance * 1.05)
-                        self.reachedTarget = self.goToMarkerUltrasound(65)
+                        self.reachedTarget = self.goToMarkerUltrasound()
                         return None
                 else:
                     self.lineUp(markerID)
 
-    def goToMarkerUltrasound(self, distanceAway):
+    def goToMarkerUltrasound(self):
         start = self.time()
         end = self.time()
         self.move(self.MAX_SPEED)
         while (start - end) < 5:
             distance = self.getUltrasoundDistance()
             print("Ultrasound distance", distance)
-            if distance < distanceAway:
+            if distance < self.ULTRA_CLOSE:
                 self.stop()
                 print("Marker reached")
                 return True
@@ -361,7 +367,7 @@ class MyRobot(Robot):
             markerInfo = self.findOne(markerID)
             if markerInfo == None:
                 self.turn(self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
-                if (start - self.time()) > 10: #NEED TO BE TESTED
+                if (start - self.time()) > 10:  # NEED TO BE TESTED
                     print("No box found")
                     self.resetVariables()
                     return None
@@ -381,19 +387,20 @@ class MyRobot(Robot):
                     self.lineUpWithoutEncoders(markerID)
 
     def getSquareOn(self, targetID):
-        #Allows for only ID
+        # Allows for only ID
         speed = 0.2
         squareOn = False
-        timesTurned = 0 #Times turned in a row without seeing a box
-        #If this exceeds self.fractionTurned then we have turned full
-        #If box still not found then assumes box is lost and break loop
+        timesTurned = 0  # Times turned in a row without seeing a box
+        # If this exceeds self.fractionTurned then we have turned full
+        # If box still not found then assumes box is lost and break loop
         while not squareOn:
             markerInfo = self.findOne([targetID])
             if not self.targetFound:  # If face not seen, turns on the spot
                 if timesTurned > self.TURN_FRACTION:
-                    self.resetVariables() # If box lost, reset variables
+                    self.resetVariables()  # If box lost, reset variables
                     return None
-                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+                self.turn(self.MAX_SPEED,
+                          self.ANGLE_TURN)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
                 timesTurned += 1
             else:
                 self.stop()
@@ -448,18 +455,19 @@ class MyRobot(Robot):
                         self.move(self.MAX_SPEED, distance - 300)
                         self.reachedTarget = True
                         targetReached = True
-                        #targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
+                        # targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
                 else:
                     self.lineUp(markerID)
 
     def grab(self):
+        print("grabbing")
         angle = -1
         interval = 0.05
         grabbed = False
         while not grabbed:
             print(angle)
-            #microSwitchLeft = self.SWITCH_LEFT.digital_read()
-            #microSwitchRight = self.SWITCH_RIGHT.digital_read()
+            # microSwitchLeft = self.SWITCH_LEFT.digital_read()
+            # microSwitchRight = self.SWITCH_RIGHT.digital_read()
             if angle >= 1:
                 print("no box grabbed")
                 self.grabbed = False
@@ -468,7 +476,6 @@ class MyRobot(Robot):
                 self.resetVariables()
                 break
             if self.isHoldingBox():
-                print("grabbing")
                 self.grabbed = True
                 grabbed = True
                 self.GRAB_SERVO.position = 1
@@ -477,6 +484,7 @@ class MyRobot(Robot):
             self.sleep(0.1)
 
     def release(self):
+        print("Releasing")
         self.GRAB_SERVO.position = -1
         self.sleep(0.5)
 

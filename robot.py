@@ -81,5 +81,15 @@ def planC(myRobot):
 robot.palletIDs = [100, 101, 103,104]
 robot.outerHighriseIDs = [102]
 
-planB(robot)
+#planB(robot)
 #planC(robot)
+
+while True:
+    print("Distance: ", robot.getUltrasoundDistance())
+    print("Holding box: ", robot.isHoldingBox())
+    print("Is box near: ", robot.isBoxNear())
+    if robot.isBoxNear() and not robot.isHoldingBox():
+        robot.grab()
+    elif not robot.isHoldingBox():
+        #print("Releasing")
+        robot.release()
