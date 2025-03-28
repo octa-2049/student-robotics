@@ -347,6 +347,7 @@ class MyRobot(Robot):
         self.move(self.MAX_SPEED)
         while (start - end) < 5:
             distance = self.getUltrasoundDistance()
+            print("Ultrasound distance", distance)
             if distance < distanceAway:
                 self.stop()
                 print("Marker reached")
