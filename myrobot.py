@@ -506,11 +506,11 @@ class MyRobot(Robot):
             print(angle)
             print(self.getUltrasoundDistance())
             if angle >= 1:
-                if not self.isBoxNear(): #NOT SURE THIS IS RIGHT
-                    print("no box grabbed")
-                    self.reachedTarget = False
-                    self.release()
-                    self.resetVariables()
+                #if not self.isBoxNear(): #NOT SURE THIS IS RIGHT
+                print("no box grabbed")
+                self.reachedTarget = False
+                self.release()
+                self.resetVariables()
                 break
             if self.isHoldingBox():
                 grabbed = True
