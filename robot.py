@@ -1,19 +1,6 @@
 from myrobot import MyRobot
 robot = MyRobot()
 
-def test():
-    while True:
-        print("Distance: ", robot.getUltrasoundDistance())
-        print("Holding box: ", robot.isHoldingBox())
-        print("Is box near: ", robot.isBoxNear())
-
-        if robot.isBoxNear() and not robot.isHoldingBox():
-            robot.grab()
-        elif not robot.isBoxNear():
-            # print("Releasing")
-            robot.release()
-
-
 def planB(myRobot):
     palletID = 0  # Stored until box released next to
     while True:
