@@ -1,13 +1,12 @@
 import math
-from sr.robot3 import *
-
+from sr.robot3 import Robot
 
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
         self.PAUSE = 0.4  # Tme in seconds for sleep time
-        self.MAX_SPEED = 0.22
+        self.MAX_SPEED = 0.3 #0.22
         self.ANGLE_OUT = 0.15
         self.TURN_FRACTION = 20
         self.ANGLE_TURN = math.pi / self.TURN_FRACTION
@@ -33,8 +32,9 @@ class MyRobot(Robot):
                           [i for i in range(120, 140)],
                           [i for i in range(140, 160)],
                           [i for i in range(160, 180)]]
-        self.palletIDs = localMarkerIDs[self.zone]
-        self.outerHighriseIDs = [i for i in range(195, 198)]
+        self.PALLETS = localMarkerIDs[self.zone] #All pallets we can grab
+        self.palletIDs = localMarkerIDs[self.zone] #Pallets left to grab
+        self.outerHighriseIDs = [i for i in range(195, 199)]
         self.innerHighriseID = [199]
         self.arenaMarkers = [i for i in range(0, 28)]
 
@@ -49,8 +49,6 @@ class MyRobot(Robot):
         self.targetFound = False
         self.faceFound = False
         self.reachedTarget = False
-        self.scissorLiftUp = False
-        self.grabbed = False
 
     def resetVariables(self):
         # Once box deposited, reset so that it restarts
@@ -58,10 +56,7 @@ class MyRobot(Robot):
         self.targetFace = []
         self.targetRoll = None
         self.hasTarget = False
-        self.targetFound = False
         self.reachedTarget = False
-        self.scissorLiftUp = False
-        self.grabbed = False
 
     def printMarkerInfo(self, marker):
         # ID, size
@@ -86,6 +81,20 @@ class MyRobot(Robot):
     def stop(self):
         self.LEFT_MOTOR.power = 0
         self.RIGHT_MOTOR.power = 0
+
+    def getBatteryStatus(self):
+        voltage = self.power_board.battery_sensor.voltage
+        print("Voltage: ", voltage)
+        current = self.power_board.battery_sensor.current
+        print("Current: ", current)
+        return voltage, current
+
+    def getWheelCurrent(self):
+        leftCurrent = self.LEFT_MOTOR.current
+        rightCurrent = self.RIGHT_MOTOR.current
+        print("Left wheel current: ", leftCurrent)
+        print("Right wheel current: ", rightCurrent)
+        return leftCurrent, rightCurrent
 
     def getWheelPositions(self):  # returns right and left motor positions
         leftPos = float(self.arduino.command("n"))
@@ -183,6 +192,7 @@ class MyRobot(Robot):
             self.stop()
 
     def randomMovement1(self):
+        print("Random movement 1")
         self.move(self.MAX_SPEED, 200)
         self.turn(self.MAX_SPEED, math.pi / 4)
         self.move(self.MAX_SPEED, 200)
@@ -196,15 +206,12 @@ class MyRobot(Robot):
         # print("Started")
         markers = self.camera.see()
         targetInfos = []
-        self.targetFound = False
         if markers != None:
             if targetIDs == None:  # If no target but just want to
                 return markers  # see if any markers visible
             for mark in markers:
                 if mark.id in targetIDs and self.isGoodFace(mark):
-                    self.targetFound = True
                     targetInfos.append(mark)
-                    # return mark
         singleFace = self.chooseBestFace(targetInfos)
         return singleFace  # returns either [] or first marker seen
 
@@ -217,12 +224,10 @@ class MyRobot(Robot):
         # print("Started")
         targetInfos = []  # Multiple faces of same target stored here
         markers = self.camera.see()
-        self.targetFound = False
         if markers != None:
             for mark in markers:
                 if mark.id in targetIDs and self.isGoodFace(mark):
                     targetInfos.append(mark)
-                    self.targetFound = True
         return targetInfos  # returns either [] or all markers seen
 
     def findFace(self, targetId, targetRoll):  # DO NOT USE
@@ -282,6 +287,7 @@ class MyRobot(Robot):
                 self.hasTarget = True
 
     def lineUp(self, targetID):
+        print("Lining up on", targetID)
         # Lines up on specific face,if marker goes out of vision breaks loop
         linedUp = False
         while not linedUp:
@@ -318,12 +324,12 @@ class MyRobot(Robot):
                 return None
 
     def goToBoxStraight(self, markerID):
-        print("Looking for " + str(markerID))
+        print("Going to straight " + str(markerID))
         targetReached = False
         timesTurned = 0
         while not targetReached:
             markerInfo = self.findOne([markerID])
-            if not self.targetFound:
+            if markerInfo == []:
                 if timesTurned > self.TURN_FRACTION:
                     self.resetVariables()
                     # If box lost, reset variables
@@ -358,6 +364,7 @@ class MyRobot(Robot):
                 self.stop()
                 print("Marker reached")
                 return True
+            end = self.time()
         return False
 
     def goToBoxWithoutEncoders(self, markerID):
@@ -373,7 +380,6 @@ class MyRobot(Robot):
                     return None
             else:
                 start = self.time()
-                angleOut = markerInfo.position.horizontal_angle
                 print("Found marker")
                 if self.isLinedUp(markerInfo):
                     print("linedUp")
@@ -395,7 +401,7 @@ class MyRobot(Robot):
         # If box still not found then assumes box is lost and break loop
         while not squareOn:
             markerInfo = self.findOne([targetID])
-            if not self.targetFound:  # If face not seen, turns on the spot
+            if markerInfo == []:  # If face not seen, turns on the spot
                 if timesTurned > self.TURN_FRACTION:
                     self.resetVariables()  # If box lost, reset variables
                     return None
@@ -435,7 +441,7 @@ class MyRobot(Robot):
         timesTurned = 0
         while not targetReached:
             markerInfo = self.findOne([markerID])
-            if not self.targetFound:
+            if markerInfo == []:
                 if timesTurned > self.TURN_FRACTION:
                     self.randomMovement1()
                     timesTurned = 0
@@ -451,11 +457,10 @@ class MyRobot(Robot):
                     self.move(self.MAX_SPEED, distance / 4)
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
-                    if distance < 800:  # NEEDS TO BE TESTED
+                    if distance < 800:
                         self.move(self.MAX_SPEED, distance - 300)
                         self.reachedTarget = True
                         targetReached = True
-                        # targetReached = self.goToMarkerUltrasound(140) #NEEDS TO BE TEST
                 else:
                     self.lineUp(markerID)
 
@@ -466,22 +471,20 @@ class MyRobot(Robot):
         grabbed = False
         while not grabbed:
             print(angle)
-            # microSwitchLeft = self.SWITCH_LEFT.digital_read()
-            # microSwitchRight = self.SWITCH_RIGHT.digital_read()
             if angle >= 1:
-                print("no box grabbed")
-                self.grabbed = False
-                self.reachedTarget = False
-                self.release()
-                self.resetVariables()
+                if not self.isBoxNear(): #NOT SURE THIS IS RIGHT
+                    print("no box grabbed")
+                    self.reachedTarget = False
+                    self.release()
+                    self.resetVariables()
                 break
             if self.isHoldingBox():
-                self.grabbed = True
                 grabbed = True
                 self.GRAB_SERVO.position = 1
             self.GRAB_SERVO.position = angle
             angle += interval
             self.sleep(0.1)
+        self.sleep(0.5)
 
     def release(self):
         print("Releasing")
