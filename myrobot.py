@@ -464,6 +464,39 @@ class MyRobot(Robot):
                 else:
                     self.lineUp(markerID)
 
+    def goToOuterDistrict(self, markerID):
+        self.getSquareOn(markerID)
+        print("Going to straight ", markerID)
+        targetReached = False
+        timesTurned = 0
+        while not targetReached:
+            markerInfo = self.findOne([markerID])
+            if markerInfo == []:
+                if timesTurned > self.TURN_FRACTION:
+                    self.resetVariables()
+                    # If box lost, reset variables
+                    return None
+                print("no marker found")
+                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
+                timesTurned += 1
+            else:
+                timesTurned = 0
+                print("Found marker", markerID)
+                if self.isLinedUp(markerInfo):
+                    print("Lined up")
+                    distance = markerInfo.position.distance
+                    #self.sleep(0.5)
+                    if distance < self.DISTRICT_MIN:
+                        self.move(-self.MAX_SPEED, (self.DISTRICT_MIN- distance)/2)
+                    elif distance > self.DISTRICT_MAX:
+                        self.move(self.MAX_SPEED, (distance-self.DISTRICT_MAX/2))
+                    else:
+                        self.stop()
+                        self.reachedTarget = True
+                        return None
+                else:
+                    self.lineUp(markerID)
+
     def grab(self):
         print("grabbing")
         angle = -1
