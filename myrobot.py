@@ -262,11 +262,11 @@ class MyRobot(Robot):
                 bestMarker = marker
         return bestMarker
 
-    def findBestMarker(self):
-        if self.isTargetBox:
-            targetIDs = self.palletIDs
-        else:
-            targetIDs = self.outerHighriseIDs
+    def findBestMarker(self, targetIDs):
+        # if self.isTargetBox:
+        #     targetIDs = self.palletIDs
+        # else:
+        #     targetIDs = self.outerHighriseIDs
         timesTurned = 0  # Times turned in a row
 
         while not self.hasTarget:
