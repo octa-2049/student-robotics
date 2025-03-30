@@ -106,7 +106,7 @@ def planC(myRobot):
         else:  # If target is a high rise
             if not myRobot.hasTarget:
                 print("Finding high rise marker")
-                myRobot.findBestMarker()
+                myRobot.findBestMarker(myRobot.outerHighriseIDs)
             elif not myRobot.reachedTarget:
                 print("Going to high rise")
                 myRobot.goToHighRise(myRobot.targetID)
