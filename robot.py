@@ -71,7 +71,7 @@ def planC(myRobot):
         if myRobot.isTargetBox:
             if not myRobot.hasTarget:
                 print("Finding pallet marker")
-                myRobot.findBestMarker()
+                myRobot.findBestMarker(myRobot.palletIDs)
             elif not myRobot.reachedTarget:
                 print("Going to pallet")
                 myRobot.goToBoxStraight(myRobot.targetID)
