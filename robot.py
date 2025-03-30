@@ -86,6 +86,23 @@ def planC(myRobot):
             myRobot.isTargetBox = True
             myRobot.resetVariables()
 
+        elif myRobot.boxesPlaced > 2:
+            if not myRobot.hasTarget:
+                print("Finding best outer district marker")
+                myRobot.findBestMarker(myRobot.outerDistricts[0])
+            elif not myRobot.reachedTarget:
+                print("Going to outer district")
+                myRobot.goToOuterDistrict(myRobot.targetID)
+            else:
+                if palletID in myRobot.palletIDs:
+                    myRobot.palletIDs.remove(palletID)
+                    myRobot.boxesPlaced += 1
+                print("Pallet ids:", myRobot.palletIDs)
+                myRobot.move(-myRobot.MAX_SPEED, 500)
+                myRobot.isTargetBox = True
+                print("Going to next box")
+                myRobot.resetVariables()  # Start loop again to look for next box
+
         else:  # If target is a high rise
             if not myRobot.hasTarget:
                 print("Finding high rise marker")
