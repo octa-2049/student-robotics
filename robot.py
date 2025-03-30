@@ -57,6 +57,7 @@ def planB(myRobot):
                 print("Deposited box", palletID)
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
+                    myRobot.boxesPlaced += 1
                 print("Pallet ids left:", myRobot.palletIDs)
                 myRobot.move(-myRobot.MAX_SPEED, 500)
                 myRobot.isTargetBox = True
