@@ -102,6 +102,37 @@ def planC(myRobot):
                 print("Going to next box")
                 myRobot.resetVariables()  # Start loop again to look for next box
 
+def test(myRobot):
+    while True:
+        print("Nothing running: ")
+        myRobot.getBatteryStatus()
+        myRobot.getWheelCurrent()
+        print("Moving straight: ")
+        myRobot.move(myRobot.MAX_SPEED)
+        myRobot.getBatteryStatus()
+        myRobot.getWheelCurrent()
+        myRobot.sleep(5)
+        myRobot.stop()
+        myRobot.sleep(5)
+        print("Turning: ")
+        myRobot.turn(myRobot.MAX_SPEED)
+        myRobot.getBatteryStatus()
+        myRobot.getWheelCurrent()
+        myRobot.sleep(5)
+        robot.stop()
+        myRobot.sleep(5)
+
+def testGoToDistrict(myRobot):
+    while True:
+        if not myRobot.hasTarget:
+            print("Finding best outer district marker")
+            myRobot.findBestMarker(myRobot.outerDistricts[0])
+        elif not myRobot.reachedTarget:
+            print("Going to outer district")
+            myRobot.goToOuterDistrict(myRobot.targetID)
+        else:
+            print("Reached outer district")
+
 robot.palletIDs = [100, 101, 103,104]
 robot.outerHighriseIDs = [102]
 
