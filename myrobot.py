@@ -12,6 +12,8 @@ class MyRobot(Robot):
         self.ANGLE_TURN = math.pi / self.TURN_FRACTION
         self.VALID_YAW = math.pi / 4  # How much angle we allow before not considering face
         self.ULTRA_CLOSE = 70
+        self.DISTRICT_MAX = 1700 #Maximum distance to still be inside district
+        self.DISTRICT_MIN = 950 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
