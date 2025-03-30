@@ -138,6 +138,6 @@ robot.outerHighriseIDs = [102]
 
 #planB(robot)
 #planC(robot)
-#test(robot)
-
+test(robot)
+testGoToDistrict(robot)
 
