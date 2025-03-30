@@ -113,6 +113,7 @@ def planC(myRobot):
             else:
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
+                    myRobot.boxesPlaced += 1
                 print("Pallet ids:", myRobot.palletIDs)
                 myRobot.move(-myRobot.MAX_SPEED, 500)
                 myRobot.isTargetBox = True
