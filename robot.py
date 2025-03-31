@@ -159,8 +159,8 @@ def testGoToDistrict(myRobot):
 robot.palletIDs = [100, 101, 103,104]
 robot.outerHighriseIDs = [102]
 
-#planB(robot)
+planB(robot)
 #planC(robot)
-test(robot)
-testGoToDistrict(robot)
+#test(robot)
+#testGoToDistrict(robot)
 
