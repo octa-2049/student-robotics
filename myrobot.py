@@ -181,8 +181,8 @@ class MyRobot(Robot):
     def turn(self, speed, angle=None):
         # When speed positive robot turns ANTI-clockwise
         if angle == None:
-            self.LEFT_MOTOR.power = -speed
-            self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
+            self.LEFT_MOTOR.power = speed
+            self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
         else:
             angleToTurn = angle * self.WIDTH / self.DIAMETER
             # angleToTurn in arbitrary units 1 = 1 complete revolution of wheel
