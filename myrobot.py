@@ -487,7 +487,7 @@ class MyRobot(Robot):
                     # If box lost, reset variables
                     return None
                 print("no marker found")
-                self.turn(self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
                 timesTurned += 1
             else:
                 timesTurned = 0
