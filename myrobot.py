@@ -497,7 +497,7 @@ class MyRobot(Robot):
                     distance = markerInfo.position.distance
                     #self.sleep(0.5)
                     if distance < self.DISTRICT_MIN:
-                        self.move(-self.MAX_SPEED, (self.DISTRICT_MIN- distance)/2)
+                        self.move(-self.MAX_SPEED, (self.DISTRICT_MIN - distance)/2)
                     elif distance > self.DISTRICT_MAX:
                         self.move(self.MAX_SPEED, (distance-self.DISTRICT_MAX/2))
                     else:
