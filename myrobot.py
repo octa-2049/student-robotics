@@ -383,7 +383,7 @@ class MyRobot(Robot):
         while not targetReached:
             markerInfo = self.findOne(markerID)
             if markerInfo == None:
-                self.turn(self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
+                self.turn(-self.MAX_SPEED)  # NEEDS WAY TO EXIT IF NOT FOUND
                 if (start - self.time()) > 10:  # NEED TO BE TESTED
                     print("No box found")
                     self.resetVariables()
