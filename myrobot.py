@@ -288,7 +288,7 @@ class MyRobot(Robot):
                 if timesTurned > self.TURN_FRACTION:
                     self.randomMovement1()
                     timesTurned = 0
-                self.turn(self.MAX_SPEED, self.ANGLE_TURN)
+                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)
                 timesTurned += 1
             else:
                 self.stop()
