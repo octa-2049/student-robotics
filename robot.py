@@ -156,11 +156,37 @@ def testGoToDistrict(myRobot):
         else:
             print("Reached outer district")
 
+def testDutyLimits(myRobot):
+    while True:
+        myRobot.release()
+        print("1700")
+        myRobot.GRAB_SERVO.set_duty_limits(700, 1700)
+        myRobot.grab()
+        myRobot.release()
+        print("1750")
+        myRobot.GRAB_SERVO.set_duty_limits(700, 1750)
+        myRobot.grab()
+        myRobot.release()
+        print("1800")
+        myRobot.GRAB_SERVO.set_duty_limits(700, 1800)
+        myRobot.grab()
+        myRobot.release()
+        print("1850")
+        myRobot.GRAB_SERVO.set_duty_limits(700, 1850)
+        myRobot.grab()
+        myRobot.release()
+        print("1900")
+        myRobot.GRAB_SERVO.set_duty_limits(700, 1900)
+
+
 robot.palletIDs = [100, 101, 103,104]
 robot.outerHighriseIDs = [102]
 
-planB(robot)
+#planB(robot)
 #planC(robot)
 #test(robot)
-#testGoToDistrict(robot)
+testGoToDistrict(robot)
+#testDutyLimits(robot)
+
+robot.getSquareOn(26)
 

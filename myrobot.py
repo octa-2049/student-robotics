@@ -1,16 +1,16 @@
-import math
+from math import pi, degrees
 from sr.robot3 import Robot
 
 class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
-        self.PAUSE = 0.4  # Tme in seconds for sleep time
-        self.MAX_SPEED = 0.3 #0.22
+        self.PAUSE = 0.2  # Tme in seconds for sleep time
+        self.MAX_SPEED = 0.23
         self.ANGLE_OUT = 0.15
         self.TURN_FRACTION = 20
-        self.ANGLE_TURN = math.pi / self.TURN_FRACTION
-        self.VALID_YAW = math.pi / 4  # How much angle we allow before not considering face
+        self.ANGLE_TURN = pi / self.TURN_FRACTION
+        self.VALID_YAW = pi / 4  # How much angle we allow before not considering face
         self.ULTRA_CLOSE = 70
         self.DISTRICT_MAX = 1700 #Maximum distance to still be inside district
         self.DISTRICT_MIN = 950 #Minimum distance to still be inside district
@@ -25,7 +25,7 @@ class MyRobot(Robot):
         self.US_TRIGGER = 12  # Trigger pin for ultrasound
         self.US_ECHO = 13  # Echo pin for ultrasound
         self.GRAB_SERVO = self.servo_board.servos[0]
-        self.GRAB_SERVO.set_duty_limits(700, 1600)
+        self.GRAB_SERVO.set_duty_limits(700, 1900)
         self.SWITCH_LEFT = self.arduino.pins[10]  # Left microswitch
         self.SWITCH_RIGHT = self.arduino.pins[11]  # Right microswitch
 
@@ -121,7 +121,7 @@ class MyRobot(Robot):
     def getRollDeg(self, marker):
         roll = marker.orientation.roll
         # Side either -180, 90, 0, 90, 180 degrees
-        rollDeg = math.degrees(roll)
+        rollDeg = degrees(roll)
         rollDeg = int(90 * round(float(rollDeg) / 90))
         if rollDeg == -180:
             rollDeg = 180
@@ -172,7 +172,7 @@ class MyRobot(Robot):
                 rightDiff = abs(startRightPos - currentRightPos)
                 # leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
-                distanceMoved = avgDiff * self.DIAMETER * math.pi
+                distanceMoved = avgDiff * self.DIAMETER * pi
                 distanceMoved = round(distanceMoved, -2)
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
@@ -196,7 +196,7 @@ class MyRobot(Robot):
                 rightDiff = abs(startRightPos - currentRightPos)
                 # leftDiff = rightDiff  # Needs to be deleted when right encoder works
                 avgDiff = (leftDiff + rightDiff) / 2
-                angleTurned = (avgDiff * 2 * math.pi)
+                angleTurned = (avgDiff * 2 * pi)
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
             self.stop()
@@ -204,7 +204,7 @@ class MyRobot(Robot):
     def randomMovement1(self):
         print("Random movement 1")
         self.move(self.MAX_SPEED, 200)
-        self.turn(self.MAX_SPEED, math.pi / 4)
+        self.turn(self.MAX_SPEED, pi / 4)
         self.move(self.MAX_SPEED, 200)
 
     def findOne(self, targetIDs=None):
@@ -309,9 +309,9 @@ class MyRobot(Robot):
                     self.stop()
                 else:
                     if angleOut < 0:  # MORE POSITIVE THAN NEGATIVE
-                        self.turn(self.MAX_SPEED, -angleOut / 2)
+                        self.turn(self.MAX_SPEED, -angleOut / 4)
                     else:
-                        self.turn(-self.MAX_SPEED, angleOut / 2)
+                        self.turn(-self.MAX_SPEED, angleOut / 4)
             else:
                 return None
 
@@ -367,9 +367,12 @@ class MyRobot(Robot):
         start = self.time()
         end = self.time()
         self.move(self.MAX_SPEED)
-        while (start - end) < 5:
+        while (start - end) < 10:
             distance = self.getUltrasoundDistance()
             print("Ultrasound distance", distance)
+            if (start - end) > 2:
+                self.move(-self.MAX_SPEED, 50)
+                self.move(self.MAX_SPEED)
             if distance < self.ULTRA_CLOSE:
                 self.stop()
                 print("Marker reached")
@@ -403,6 +406,7 @@ class MyRobot(Robot):
                     self.lineUpWithoutEncoders(markerID)
 
     def getSquareOn(self, targetID):
+        print("Getting square on")
         # Allows for only ID
         speed = 0.2
         squareOn = False
@@ -415,28 +419,27 @@ class MyRobot(Robot):
                 if timesTurned > self.TURN_FRACTION:
                     self.resetVariables()  # If box lost, reset variables
                     return None
-                self.turn(self.MAX_SPEED,
-                          self.ANGLE_TURN)  # NEEDS WAY TO EXIT LOOP AFTER TURNED 360 degrees and nothing seen
+                self.turn(self.MAX_SPEED,self.ANGLE_TURN)
                 timesTurned += 1
             else:
                 self.stop()
                 if self.isLinedUp(markerInfo):
                     yaw = self.getYawRad(markerInfo)
                     distance = markerInfo.position.distance
-                    if distance > 1500:
-                        self.move(self.MAX_SPEED, distance - 1500)
-                    elif yaw > 0:
+                    if yaw > 0:
+                        yaw = pi/2 - yaw #To get alternate angle
                         distanceAway = self.getCos(yaw) * distance
                         print(distanceAway, self.getCos(yaw), distance)
-                        self.turn(self.MAX_SPEED, yaw)
-                        self.move(self.MAX_SPEED, distanceAway)
-                        self.turn(-self.MAX_SPEED, math.pi / 2)
+                        self.turn(-0.1, yaw)
+                        self.move(speed, distanceAway)
+                        self.turn(speed, pi / 2)
                     else:  # If yaw negative
+                        yaw = - (pi/2 + yaw) #To get negative alternate angle
                         distanceAway = self.getCos(-yaw) * distance
                         print(distanceAway, self.getCos(-yaw), distance)
-                        self.turn(-self.MAX_SPEED, -yaw)
-                        self.move(self.MAX_SPEED, distanceAway)
-                        self.turn(self.MAX_SPEED, math.pi / 2)
+                        self.turn(0.1, -yaw)
+                        self.move(speed, distanceAway)
+                        self.turn(-speed, pi / 2)
                     squareOn = True
                 else:
                     self.lineUp(targetID)
@@ -468,7 +471,7 @@ class MyRobot(Robot):
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 800:
-                        self.move(self.MAX_SPEED, distance - 300)
+                        self.move(self.MAX_SPEED, distance - 350)
                         self.reachedTarget = True
                         targetReached = True
                 else:
@@ -513,8 +516,8 @@ class MyRobot(Robot):
         interval = 0.05
         grabbed = False
         while not grabbed:
-            print(angle)
-            print(self.getUltrasoundDistance())
+            #print(angle)
+            #print(self.getUltrasoundDistance())
             if angle >= 1:
                 #if not self.isBoxNear(): #NOT SURE THIS IS RIGHT
                 print("no box grabbed")
