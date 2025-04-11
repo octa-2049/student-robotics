@@ -12,8 +12,8 @@ class MyRobot(Robot):
         self.ANGLE_TURN = pi / self.TURN_FRACTION
         self.VALID_YAW = pi / 4  # How much angle we allow before not considering face
         self.ULTRA_CLOSE = 70
-        self.DISTRICT_MAX = 1700 #Maximum distance to still be inside district
-        self.DISTRICT_MIN = 950 #Minimum distance to still be inside district
+        self.DISTRICT_MAX = 1650 #Maximum distance to still be inside district
+        self.DISTRICT_MIN = 1000 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
@@ -88,7 +88,11 @@ class MyRobot(Robot):
         print("Roll ", marker.orientation.roll)
         print("Actual yaw: " + str(self.getYawRad(marker)))
 
-    def stop(self):
+    def stop(self):#
+        self.LEFT_MOTOR.power = -1
+        self.RIGHT_MOTOR.power = -1
+        self.LEFT_MOTOR.power = 1
+        self.RIGHT_MOTOR.power = 1
         self.LEFT_MOTOR.power = 0
         self.RIGHT_MOTOR.power = 0
 
@@ -309,9 +313,9 @@ class MyRobot(Robot):
                     self.stop()
                 else:
                     if angleOut < 0:  # MORE POSITIVE THAN NEGATIVE
-                        self.turn(self.MAX_SPEED, -angleOut / 4)
+                        self.turn(-self.MAX_SPEED, -angleOut / 4)
                     else:
-                        self.turn(-self.MAX_SPEED, angleOut / 4)
+                        self.turn(self.MAX_SPEED, angleOut / 4)
             else:
                 return None
 

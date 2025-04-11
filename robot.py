@@ -178,15 +178,27 @@ def testDutyLimits(myRobot):
         print("1900")
         myRobot.GRAB_SERVO.set_duty_limits(700, 1900)
 
+def testGrabbing(myRobot):
+    while True:
+        if myRobot.isHoldingBox():
+            myRobot.stop()
+            return True
+        elif myRobot.isBoxNear():
+            myRobot.stop()
+            myRobot.grab()
+        else:
+            myRobot.move(0.2)
+            myRobot.sleep(1)
 
 robot.palletIDs = [100, 101, 103,104]
 robot.outerHighriseIDs = [102]
 
-#planB(robot)
+planB(robot)
 #planC(robot)
 #test(robot)
-testGoToDistrict(robot)
+#testGoToDistrict(robot)
 #testDutyLimits(robot)
 
-robot.getSquareOn(26)
+#robot.getSquareOn(26)
+#testGrabbing(robot)
 
