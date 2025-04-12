@@ -16,7 +16,7 @@ class MyRobot(Robot):
         self.DISTRICT_MIN = 1000 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
         self.MAX_CURRENT = 1
-        self.MAX_TIME = 10
+        self.MAX_TIME = 5
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
@@ -214,7 +214,7 @@ class MyRobot(Robot):
 
     def randomMovement1(self):
         print("Random movement 1")
-        self.move(self.MAX_SPEED, -200)
+        self.move(-self.MAX_SPEED, 200)
         self.turn(self.MAX_SPEED, pi / 4)
         self.move(self.MAX_SPEED, 200)
 

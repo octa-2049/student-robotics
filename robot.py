@@ -2,7 +2,7 @@ from myrobot import MyRobot
 robot = MyRobot()
 
 def planB(myRobot):
-
+    myRobot.release()
     palletID = 0  # Stored until box released next to
     start = myRobot.time
     end = myRobot.time
