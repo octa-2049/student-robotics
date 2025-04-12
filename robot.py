@@ -2,8 +2,12 @@ from myrobot import MyRobot
 robot = MyRobot()
 
 def planB(myRobot):
+
     palletID = 0  # Stored until box released next to
+    start = myRobot.time
+    end = myRobot.time
     while True:
+        myRobot.getBatteryStatus()
         if myRobot.isTargetBox:
             if not myRobot.hasTarget:
                 print("Finding pallet marker")
@@ -32,10 +36,27 @@ def planB(myRobot):
                 myRobot.isTargetBox = True
                 myRobot.resetVariables()
 
-        elif myRobot.boxesPlaced > 2:
+        elif myRobot.boxesPlaced == 3:
             if not myRobot.hasTarget:
                 print("Finding best outer district marker")
                 myRobot.findBestMarker(myRobot.outerDistricts[0])
+            elif not myRobot.reachedTarget:
+                print("Going to outer district")
+                myRobot.goToOuterDistrict(myRobot.targetID)
+            else:
+                if palletID in myRobot.palletIDs:
+                    myRobot.palletIDs.remove(palletID)
+                    myRobot.boxesPlaced += 1
+                print("Pallet ids:", myRobot.palletIDs)
+                myRobot.move(-myRobot.MAX_SPEED, 500)
+                myRobot.isTargetBox = True
+                print("Going to next box")
+                myRobot.resetVariables()
+
+        elif myRobot.boxesPlaced == 4:
+            if not myRobot.hasTarget:
+                print("Finding best outer district marker")
+                myRobot.findBestMarker(myRobot.innerHighriseID)
             elif not myRobot.reachedTarget:
                 print("Going to outer district")
                 myRobot.goToOuterDistrict(myRobot.targetID)
@@ -125,25 +146,27 @@ def planC(myRobot):
                 print("Going to next box")
                 myRobot.resetVariables()  # Start loop again to look for next box
 
-def test(myRobot):
-    while True:
-        print("Nothing running: ")
-        myRobot.getBatteryStatus()
+def testCurrent(myRobot):
+    leftCurrent, rightCurrent = myRobot.getWheelCurrent()
+    while leftCurrent < myRobot.MAX_CURRENT and rightCurrent < myRobot.MAX_CURRENT:
+        #print("Nothing running: ")
+        #myRobot.getBatteryStatus()
         myRobot.getWheelCurrent()
-        print("Moving straight: ")
+        #print("Moving straight: ")
         myRobot.move(myRobot.MAX_SPEED)
-        myRobot.getBatteryStatus()
-        myRobot.getWheelCurrent()
-        myRobot.sleep(5)
-        myRobot.stop()
-        myRobot.sleep(5)
-        print("Turning: ")
-        myRobot.turn(myRobot.MAX_SPEED)
-        myRobot.getBatteryStatus()
-        myRobot.getWheelCurrent()
-        myRobot.sleep(5)
-        robot.stop()
-        myRobot.sleep(5)
+        # myRobot.getBatteryStatus()
+        # myRobot.getWheelCurrent()
+        # myRobot.sleep(5)
+        # myRobot.stop()
+        # myRobot.sleep(5)
+        # print("Turning: ")
+        # myRobot.turn(myRobot.MAX_SPEED)
+        # myRobot.getBatteryStatus()
+        # myRobot.getWheelCurrent()
+        # myRobot.sleep(5)
+        # robot.stop()
+        # myRobot.sleep(5)
+        leftCurrent, rightCurrent = myRobot.getWheelCurrent()
 
 def testGoToDistrict(myRobot):
     while True:
@@ -190,15 +213,25 @@ def testGrabbing(myRobot):
             myRobot.move(0.2)
             myRobot.sleep(1)
 
-robot.palletIDs = [100, 101, 103,104]
-robot.outerHighriseIDs = [102]
+def test(myRobot):
+    start = myRobot.time()
+    myRobot.sleep(5)
+    end = myRobot.time()
+    print(start-end)
+
+# robot.palletIDs = [100, 101, 103,104]
+# robot.outerHighriseIDs = [102]
+# zone = 2
+# robot.PALLETS = robot.localMarkerIDs[zone]
+# robot.palletIDs = robot.localMarkerIDs[zone]
+
 
 planB(robot)
 #planC(robot)
-#test(robot)
+#testCurrent(robot)
 #testGoToDistrict(robot)
 #testDutyLimits(robot)
 
 #robot.getSquareOn(26)
 #testGrabbing(robot)
-
+#test(robot)

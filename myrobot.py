@@ -15,6 +15,8 @@ class MyRobot(Robot):
         self.DISTRICT_MAX = 1650 #Maximum distance to still be inside district
         self.DISTRICT_MIN = 1000 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
+        self.MAX_CURRENT = 1
+        self.MAX_TIME = 10
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
@@ -30,12 +32,12 @@ class MyRobot(Robot):
         self.SWITCH_RIGHT = self.arduino.pins[11]  # Right microswitch
 
         # Variables
-        localMarkerIDs = [[i for i in range(100, 120)],
+        self.localMarkerIDs = [[i for i in range(100, 120)],
                           [i for i in range(120, 140)],
                           [i for i in range(140, 160)],
                           [i for i in range(160, 180)]]
-        self.PALLETS = localMarkerIDs[self.zone] #All pallets we can grab
-        self.palletIDs = localMarkerIDs[self.zone] #Pallets left to grab
+        self.PALLETS = self.localMarkerIDs[self.zone] #All pallets we can grab
+        self.palletIDs = self.localMarkerIDs[self.zone] #Pallets left to grab
         self.outerHighriseIDs = [i for i in range(195, 199)]
         self.innerHighriseID = [199]
         self.arenaMarkers = [i for i in range(0, 28)]
@@ -207,6 +209,12 @@ class MyRobot(Robot):
 
     def randomMovement1(self):
         print("Random movement 1")
+        self.move(self.MAX_SPEED, -200)
+        self.turn(self.MAX_SPEED, pi / 4)
+        self.move(self.MAX_SPEED, 200)
+
+    def randomMovementBad(self):
+        print("Random movement extra")
         self.move(self.MAX_SPEED, 200)
         self.turn(self.MAX_SPEED, pi / 4)
         self.move(self.MAX_SPEED, 200)
@@ -282,18 +290,22 @@ class MyRobot(Robot):
         # else:
         #     targetIDs = self.outerHighriseIDs
         timesTurned = 0  # Times turned in a row
-
+        start = self.time()
+        end = self.time()
         while not self.hasTarget:
             markers = self.findAll(targetIDs)
             # NEEDS TO USE FIND ALL NOT FIND ONE OTHERWISE CANNOT CHOOSE WHICH
             # MARKER BEST ONE
+
             if markers == []:
                 # DO SOMETHING IF NO MARKER FOUND:
-                if timesTurned > self.TURN_FRACTION:
+                if timesTurned > self.TURN_FRACTION or (end - start) > self.MAX_TIME:
                     self.randomMovement1()
                     timesTurned = 0
+                    start = self.time()
                 self.turn(-self.MAX_SPEED, self.ANGLE_TURN)
                 timesTurned += 1
+                end = self.time()
             else:
                 self.stop()
                 self.targetFace = self.chooseBestMarker(markers)
@@ -475,7 +487,7 @@ class MyRobot(Robot):
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 800:
-                        self.move(self.MAX_SPEED, distance - 350)
+                        self.move(self.MAX_SPEED, distance - 300)
                         self.reachedTarget = True
                         targetReached = True
                 else:
