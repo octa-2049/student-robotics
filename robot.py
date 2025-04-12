@@ -73,7 +73,7 @@ def planB(myRobot):
                 print("Going to next box")
                 myRobot.resetVariables()
 
-        else:  # If target is a high rise
+        else:  # If target is a outer highrise
             if not myRobot.hasTarget:
                 print("Finding high rise marker")
                 myRobot.findBestMarker(myRobot.outerHighriseIDs)
@@ -217,10 +217,10 @@ def testGrabbing(myRobot):
             myRobot.sleep(1)
 
 def test(myRobot):
-    start = myRobot.time()
-    myRobot.sleep(5)
-    end = myRobot.time()
-    print(start-end)
+    if not myRobot.move(myRobot.MAX_SPEED, 500):
+        myRobot.move(-myRobot.MAX_SPEED, 500)
+
+
 
 # robot.palletIDs = [100, 101, 103,104]
 # robot.outerHighriseIDs = [102]
@@ -229,7 +229,7 @@ def test(myRobot):
 # robot.palletIDs = robot.localMarkerIDs[zone]
 
 
-planB(robot)
+#planB(robot)
 
 #planC(robot)
 #testCurrent(robot)
@@ -238,4 +238,4 @@ planB(robot)
 
 #robot.getSquareOn(26)
 #testGrabbing(robot)
-#test(robot)
+test(robot)

@@ -16,7 +16,8 @@ class MyRobot(Robot):
         self.DISTRICT_MIN = 1000 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
         self.MAX_CURRENT = 1
-        self.MAX_TIME = 20
+        self.MAX_TIME = 1
+        self.POS_DIFF = 0.01 #Position difference between current and previous position
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
@@ -63,6 +64,7 @@ class MyRobot(Robot):
         self.targetFound = False
         self.faceFound = False
         self.reachedTarget = False
+        self.isMoving = False #Also considered as true when turning
 
     def resetVariables(self):
         # Once box deposited, reset so that it restarts
@@ -99,6 +101,7 @@ class MyRobot(Robot):
         self.RIGHT_MOTOR.power = 1
         self.LEFT_MOTOR.power = 0
         self.RIGHT_MOTOR.power = 0
+        self.isMoving = False
 
     def getBatteryStatus(self):
         voltage = self.power_board.battery_sensor.voltage
@@ -164,20 +167,31 @@ class MyRobot(Robot):
         ultraDist = self.getUltrasoundDistance()
         return ultraDist < self.ULTRA_CLOSE
 
-    def move(self, speed, distance=None):
+    def move(self, speed, distance = None):
+        self.isMoving = True
         print("Moving", speed, distance)
         if distance == None:  # if no distance to move is provided move until stopped
             self.LEFT_MOTOR.power = speed
             self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
         else:
             distanceMoved = 0
-            startLeftPos = float(self.arduino.command("n"))  # arbitrary value to move left wheel motor
-            startRightPos = float(self.arduino.command("y"))  # arbitrary value to move right wheel motor
+            startLeftPos, startRightPos = self.getWheelPositions()
+            currentLeftPos, currentRightPos = self.getWheelPositions()
+            prevLeftPos, prevRightPos = currentLeftPos, currentRightPos
             start = self.time()
-            end = self.time()
-            while distanceMoved <= distance or (end-start) < self.MAX_TIME:
-                currentLeftPos = float(self.arduino.command("n"))
-                currentRightPos = float(self.arduino.command("y"))
+            while distanceMoved <= distance:
+                print(abs(prevLeftPos - currentLeftPos), abs(prevRightPos - currentRightPos))
+                if abs(prevLeftPos - currentLeftPos) < self.POS_DIFF or abs(
+                        prevRightPos - currentRightPos) < self.POS_DIFF:
+                    if not self.isMoving:
+                        end = self.time()
+                        if (end - start) > self.MAX_TIME:
+                            return False
+                    else:
+                        self.isMoving = False
+                        start = self.time()
+                prevLeftPos, prevRightPos = currentLeftPos, currentRightPos
+                currentLeftPos, currentRightPos = self.getWheelPositions()
                 leftDiff = abs(startLeftPos - currentLeftPos)
                 rightDiff = abs(startRightPos - currentRightPos)
                 # leftDiff = rightDiff  # Needs to be deleted when right encoder works
@@ -186,10 +200,11 @@ class MyRobot(Robot):
                 distanceMoved = round(distanceMoved, -2)
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
-                end = self.time()
+                self.sleep(0.1)
             self.stop()
 
     def turn(self, speed, angle=None):
+        self.isMoving = True
         # When speed positive robot turns clockwise
         if angle == None:
             self.LEFT_MOTOR.power = speed
@@ -198,13 +213,22 @@ class MyRobot(Robot):
             angleToTurn = angle * self.WIDTH / self.DIAMETER
             # angleToTurn in arbitrary units 1 = 1 complete revolution of wheel
             angleTurned = 0
-            startLeftPos = float(self.arduino.command("n"))
-            startRightPos = float(self.arduino.command("y"))
+            startLeftPos, startRightPos = self.getWheelPositions()
+            currentLeftPos, currentRightPos = self.getWheelPositions()
+            prevLeftPos, prevRightPos = currentLeftPos, currentRightPos
             start = self.time()
-            end = self.time()
-            while angleTurned <= angleToTurn or (end - start) < self.MAX_TIME:
-                currentLeftPos = float(self.arduino.command("n"))
-                currentRightPos = float(self.arduino.command("y"))
+            while angleTurned <= angleToTurn:
+                if abs(prevLeftPos-currentLeftPos) < self.POS_DIFF or abs(
+                        prevRightPos-currentRightPos) < self.POS_DIFF:
+                    if not self.isMoving:
+                        end = self.time()
+                        if (end - start) > self.MAX_TIME:
+                            return False
+                    else:
+                        self.isMoving = False
+                        start = self.time()
+                prevLeftPos, prevRightPos = currentLeftPos, currentRightPos
+                currentLeftPos, currentRightPos = self.getWheelPositions()
                 leftDiff = abs(startLeftPos - currentLeftPos)
                 rightDiff = abs(startRightPos - currentRightPos)
                 # leftDiff = rightDiff  # Needs to be deleted when right encoder works
@@ -225,6 +249,11 @@ class MyRobot(Robot):
         self.move(self.MAX_SPEED, 200)
         self.turn(self.MAX_SPEED, pi / 4)
         self.move(self.MAX_SPEED, 200)
+
+    def evade(self):
+        if not self.move(-self.MAX_SPEED, 200):
+            self.turn(self.MAX_SPEED, pi / 4)
+            self.move(self.MAX_SPEED, 200)
 
     def findOne(self, targetIDs=None):
         # returns SINGLE MARKER NOT LIST
@@ -378,7 +407,9 @@ class MyRobot(Robot):
                 if self.isLinedUp(markerInfo):
                     print("Moving straight")
                     distance = markerInfo.position.distance
-                    self.move(self.MAX_SPEED, distance / 4)
+                    if not self.move(self.MAX_SPEED, distance / 4):
+                        self.evade()
+                        #self.move(-self.MAX_SPEED, 100)
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 600:  # NEEDS TO BE TESTED
