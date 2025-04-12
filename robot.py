@@ -55,7 +55,7 @@ def planB(myRobot):
 
         elif myRobot.boxesPlaced == 4:
             if not myRobot.hasTarget:
-                print("Finding best outer district marker")
+                print("Finding best inner high rise marker")
                 myRobot.findBestMarker(myRobot.innerHighriseID)
             elif not myRobot.reachedTarget:
                 print("Going to outer district")

@@ -171,7 +171,9 @@ class MyRobot(Robot):
             distanceMoved = 0
             startLeftPos = float(self.arduino.command("n"))  # arbitrary value to move left wheel motor
             startRightPos = float(self.arduino.command("y"))  # arbitrary value to move right wheel motor
-            while distanceMoved <= distance:
+            start = self.time()
+            end = self.time()
+            while distanceMoved <= distance and (end-start) < self.MAX_TIME:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
@@ -182,6 +184,7 @@ class MyRobot(Robot):
                 distanceMoved = round(distanceMoved, -2)
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
+                end = self.time()
             self.stop()
 
     def turn(self, speed, angle=None):
@@ -195,7 +198,9 @@ class MyRobot(Robot):
             angleTurned = 0
             startLeftPos = float(self.arduino.command("n"))
             startRightPos = float(self.arduino.command("y"))
-            while angleTurned <= angleToTurn:
+            start = self.time()
+            end = self.time()
+            while angleTurned <= angleToTurn and (end - start) < self.MAX_TIME:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
