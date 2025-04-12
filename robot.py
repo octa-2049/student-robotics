@@ -17,13 +17,16 @@ def planB(myRobot):
                 myRobot.goToBoxStraight(myRobot.targetID)
             elif myRobot.isBoxNear() and not myRobot.isHoldingBox():
                 myRobot.grab()
-            else:
                 palletID = myRobot.targetID
                 print("Has box ", palletID, " going to high rise")
                 myRobot.isTargetBox = False
                 myRobot.resetVariables()
+            else: #If has target, reached target but no box grabbed
+                #Reset to find new box
+                myRobot.isTargetBox = True
+                myRobot.resetVariables()
 
-        elif not myRobot.isHoldingBox():
+        elif not myRobot.isHoldingBox() :
             if myRobot.isBoxNear():
                 print("Box near but not grabbed")
                 myRobot.release()
@@ -77,7 +80,7 @@ def planB(myRobot):
             elif not myRobot.reachedTarget:
                 print("Going to high rise", myRobot.targetID)
                 myRobot.goToHighRise(myRobot.targetID)
-            else:
+
                 myRobot.release()
                 print("Deposited box", palletID)
                 if palletID in myRobot.palletIDs:
@@ -227,6 +230,7 @@ def test(myRobot):
 
 
 planB(robot)
+
 #planC(robot)
 #testCurrent(robot)
 #testGoToDistrict(robot)

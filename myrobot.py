@@ -16,7 +16,7 @@ class MyRobot(Robot):
         self.DISTRICT_MIN = 1000 #Minimum distance to still be inside district
         self.SPEED_MULTIPLIER = 0.96482070964
         self.MAX_CURRENT = 1
-        self.MAX_TIME = 5
+        self.MAX_TIME = 20
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
         self.MOTOR1 = "SR0REB"  # For wheels
@@ -27,7 +27,9 @@ class MyRobot(Robot):
         self.US_TRIGGER = 12  # Trigger pin for ultrasound
         self.US_ECHO = 13  # Echo pin for ultrasound
         self.GRAB_SERVO = self.servo_board.servos[0]
+        self.GRAB_SERVO.position = -1
         self.GRAB_SERVO.set_duty_limits(700, 1900)
+
         self.SWITCH_LEFT = self.arduino.pins[10]  # Left microswitch
         self.SWITCH_RIGHT = self.arduino.pins[11]  # Right microswitch
 
@@ -173,7 +175,7 @@ class MyRobot(Robot):
             startRightPos = float(self.arduino.command("y"))  # arbitrary value to move right wheel motor
             start = self.time()
             end = self.time()
-            while distanceMoved <= distance and (end-start) < self.MAX_TIME:
+            while distanceMoved <= distance or (end-start) < self.MAX_TIME:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
@@ -200,7 +202,7 @@ class MyRobot(Robot):
             startRightPos = float(self.arduino.command("y"))
             start = self.time()
             end = self.time()
-            while angleTurned <= angleToTurn and (end - start) < self.MAX_TIME:
+            while angleTurned <= angleToTurn or (end - start) < self.MAX_TIME:
                 currentLeftPos = float(self.arduino.command("n"))
                 currentRightPos = float(self.arduino.command("y"))
                 leftDiff = abs(startLeftPos - currentLeftPos)
@@ -305,6 +307,8 @@ class MyRobot(Robot):
             if markers == []:
                 # DO SOMETHING IF NO MARKER FOUND:
                 if timesTurned > self.TURN_FRACTION or (end - start) > self.MAX_TIME:
+                    print("Times turned: ", timesTurned)
+                    print("Time: ", (end-start))
                     self.randomMovement1()
                     timesTurned = 0
                     start = self.time()
@@ -388,10 +392,10 @@ class MyRobot(Robot):
         start = self.time()
         end = self.time()
         self.move(self.MAX_SPEED)
-        while (start - end) < 10:
+        while (end - start) < self.MAX_TIME:
             distance = self.getUltrasoundDistance()
             print("Ultrasound distance", distance)
-            if (start - end) > 2:
+            if (end - start) > 2:
                 self.move(-self.MAX_SPEED, 50)
                 self.move(self.MAX_SPEED)
             if distance < self.ULTRA_CLOSE:
@@ -549,7 +553,8 @@ class MyRobot(Robot):
             if self.isHoldingBox():
                 grabbed = True
                 self.GRAB_SERVO.position = 1
-            self.GRAB_SERVO.position = angle
+            else:
+                self.GRAB_SERVO.position = angle
             angle += interval
             self.sleep(0.1)
         self.sleep(0.5)
