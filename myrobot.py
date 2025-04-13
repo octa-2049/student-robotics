@@ -18,6 +18,7 @@ class MyRobot(Robot):
         self.SPEED_MULTIPLIER = 0.96482070964
         self.MAX_CURRENT = 1
         self.MAX_TIME = 1
+        self.RAND_DIST_MIN = 100
         self.RAND_DIST_MAX = 300 #Max random distance robot will move when evading
         self.RAND_ANGLE_MAX = 12 #180/RAND_ANGLE_MAX gives angle
         self.POS_DIFF = 0.01 #Position difference between current and previous position
@@ -154,7 +155,7 @@ class MyRobot(Robot):
             return is_roll_negative * markerInfo.orientation.pitch
 
     def getRandomDistance(self):
-        return randint(1, self.RAND_DIST_MAX)
+        return randint(self.RAND_DIST_MIN, self.RAND_DIST_MAX)
 
     def getRandomAngle(self):
         divisor = randint(1, self.RAND_ANGLE_MAX)
@@ -278,13 +279,13 @@ class MyRobot(Robot):
                 self.sleep(1)
             else:
                 self.turn(self.chooseDirection(), pi/2)
-                self.move(self.MAX_SPEED, self.getRandomDistance())
+                self.move(self.chooseDirection(), self.getRandomDistance())
         else:
             if not self.move(-self.MAX_SPEED, self.getRandomDistance()):
                 self.sleep(1)
             else:
                 self.turn(self.chooseDirection(), pi/2)
-                self.move(self.MAX_SPEED, self.getRandomDistance())
+                self.move(self.chooseDirection(), self.getRandomDistance())
         #return None
 
     def turnEvade(self):
@@ -526,7 +527,7 @@ class MyRobot(Robot):
                 if timesTurned > self.TURN_FRACTION:
                     self.resetVariables()  # If box lost, reset variables
                     return None
-                if not self.turn(self.MAX_SPEED,self.ANGLE_TURN):
+                if not self.turn(self.MAX_SPEED, self.ANGLE_TURN):
                     self.turnEvade()
                 timesTurned += 1
             else:

@@ -1,4 +1,5 @@
 from myrobot import MyRobot
+from sr.robot3 import COMP, DEV
 from math import pi
 robot = MyRobot()
 
@@ -15,7 +16,7 @@ def planB(myRobot):
                 myRobot.findBestMarker(myRobot.palletIDs)
             elif not myRobot.reachedTarget:
                 print("Going to pallet", myRobot.targetID)
-                myRobot.getSquareOn()
+                #myRobot.getSquareOn(myRobot.targetID)
                 myRobot.goToBoxStraight(myRobot.targetID)
             else:
                 myRobot.grab()
@@ -230,21 +231,20 @@ def test(myRobot):
         myRobot.move(-myRobot.MAX_SPEED, 500)
 
 
+if robot.mode == COMP:
+    print("This is the competition!")
+    planB(robot)
+elif robot.mode == DEV:
+    print("This is development")
+    robot.palletIDs = [100, 101, 103,104]
+    robot.outerHighriseIDs = [102]
+    planB(robot)
 
-# robot.palletIDs = [100, 101, 103,104]
-# robot.outerHighriseIDs = [102]
-# zone = 2
-# robot.PALLETS = robot.localMarkerIDs[zone]
-# robot.palletIDs = robot.localMarkerIDs[zone]
+    #planC(robot)
+    #testCurrent(robot)
+    #testGoToDistrict(robot)
+    #testDutyLimits(robot)
 
-
-planB(robot)
-
-#planC(robot)
-#testCurrent(robot)
-#testGoToDistrict(robot)
-#testDutyLimits(robot)
-
-#robot.getSquareOn(26)
-#testGrabbing(robot)
-#test(robot)
+    #robot.getSquareOn(26)
+    #testGrabbing(robot)
+    #test(robot)
