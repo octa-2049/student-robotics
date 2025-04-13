@@ -150,6 +150,22 @@ class MyRobot(Robot):
         else:  # use pitch if box is on its "side"
             return is_roll_negative * markerInfo.orientation.pitch
 
+    def getRandomDistance(self):
+        return randint(1, self.RAND_DIST_MAX)
+
+    def getRandomAngle(self):
+        divisor = randint(1, self.RAND_ANGLE_MAX)
+        multiplier = randint(1, divisor)
+        angle = (pi / divisor) * multiplier
+        return angle
+
+    def chooseDirection(self):
+        number = randint(0,1)
+        if number == 0:
+            return self.MAX_SPEED
+        else:
+            return -self.MAX_SPEED
+
     def isHoldingBox(self):
         # When being pressed, variables are false
         microSwitchLeft = not self.SWITCH_LEFT.digital_read()
