@@ -5,6 +5,7 @@ robot = MyRobot()
 
 def planB(myRobot):
     myRobot.release()
+    myRobot.move
     palletID = 0  # Stored until box released next to
     start = myRobot.time()
     end = myRobot.time()
@@ -39,11 +40,12 @@ def planB(myRobot):
                 myRobot.move(myRobot.MAX_SPEED, 100)
                 myRobot.grab()
             else:
+                myRobot.release()
                 print("Box lost")
                 myRobot.isTargetBox = True
                 myRobot.resetVariables()
 
-        elif myRobot.boxesPlaced == 4:
+        elif myRobot.boxesPlaced == 3:
             if not myRobot.hasTarget:
                 print("Finding best outer district marker")
                 myRobot.findBestMarker(myRobot.outerDistricts[0])
@@ -51,7 +53,6 @@ def planB(myRobot):
                 print("Going to outer district")
                 myRobot.goToOuterDistrict(myRobot.targetID)
                 myRobot.release()
-            else:
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
                     myRobot.boxesPlaced += 1
@@ -62,21 +63,25 @@ def planB(myRobot):
                 print("Going to next box")
                 myRobot.resetVariables()
 
-        elif myRobot.boxesPlaced == 3:
-            if not myRobot.hasTarget:
-                print("Finding best inner high rise marker")
-                myRobot.findBestMarker(myRobot.innerHighriseID)
-            elif not myRobot.reachedTarget:
+        elif myRobot.boxesPlaced == 1:
+            # if not myRobot.hasTarget:
+            #     print("Finding best inner high rise marker")
+            #     myRobot.findBestMarker(myRobot.innerHighriseID)
+            if not myRobot.reachedTarget:
                 print("Going to inner high rise")
-                myRobot.goToOuterDistrict(myRobot.targetID)
+                myRobot.goToHighRise(myRobot.targetID)
                 myRobot.release()
-            else:
+                print("Deposited box", palletID)
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
                     myRobot.boxesPlaced += 1
                 print("Pallet ids:", myRobot.palletIDs)
                 if not myRobot.move(-myRobot.MAX_SPEED, 500):
                     myRobot.moveEvade(-1)
+                if not myRobot.turn(myRobot.MAX_SPEED, pi/2):
+                    myRobot.turnEvade()
+                if not myRobot.turn(myRobot.MAX_SPEED, pi/2):
+                    myRobot.turnEvade()
                 myRobot.isTargetBox = True
                 print("Going to next box")
                 myRobot.resetVariables()
@@ -97,7 +102,9 @@ def planB(myRobot):
                 print("Pallet ids left:", myRobot.palletIDs)
                 if not myRobot.move(-myRobot.MAX_SPEED, 500):
                     myRobot.moveEvade(-1)
-                if not myRobot.turn(myRobot.MAX_SPEED, pi):
+                if not myRobot.turn(myRobot.MAX_SPEED, pi/2):
+                    myRobot.turnEvade()
+                if not myRobot.turn(myRobot.MAX_SPEED, pi/2):
                     myRobot.turnEvade()
                 myRobot.isTargetBox = True
                 print("Going to next box")
@@ -241,13 +248,14 @@ def test(myRobot):
 #     robot.outerHighriseIDs = [102]
 #     planB(robot)
 
-    #planC(robot)
-    #testCurrent(robot)
-    #testGoToDistrict(robot)
-    #testDutyLimits(robot)
+#planC(robot)
+#testCurrent(robot)
+#testGoToDistrict(robot)
+#testDutyLimits(robot)
 
-    #robot.getSquareOn(26)
-    #testGrabbing(robot)
-    #test(robot)
+#robot.getSquareOn(26)
+#testGrabbing(robot)
+#test(robot)
 
 planB(robot)
+#robot.turn(0.2, pi)

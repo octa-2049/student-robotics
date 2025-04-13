@@ -6,8 +6,8 @@ class MyRobot(Robot):
     def __init__(self):
         super().__init__()
 
-        self.PAUSE = 0.2  # Tme in seconds for sleep time
-        self.MAX_SPEED = 0.23
+        self.PAUSE = 0.5  # Tme in seconds for sleep time
+        self.MAX_SPEED = 1
         self.ANGLE_OUT = 0.15
         self.TURN_FRACTION = 20
         self.ANGLE_TURN = pi / self.TURN_FRACTION
@@ -261,6 +261,7 @@ class MyRobot(Robot):
                 angleTurned = (avgDiff * 2 * pi)
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
+                self.sleep(0.1)
             self.stop()
             return True
 
@@ -385,6 +386,7 @@ class MyRobot(Robot):
                     self.randomMovement1()
                     timesTurned = 0
                     # start = self.time()
+
                 if not self.turn(-self.MAX_SPEED, self.ANGLE_TURN):
                     self.turnEvade()
                 timesTurned += 1
