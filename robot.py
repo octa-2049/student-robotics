@@ -50,6 +50,7 @@ def planB(myRobot):
             elif not myRobot.reachedTarget:
                 print("Going to outer district")
                 myRobot.goToOuterDistrict(myRobot.targetID)
+                myRobot.release()
             else:
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
@@ -68,6 +69,7 @@ def planB(myRobot):
             elif not myRobot.reachedTarget:
                 print("Going to inner high rise")
                 myRobot.goToOuterDistrict(myRobot.targetID)
+                myRobot.release()
             else:
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
@@ -87,7 +89,6 @@ def planB(myRobot):
             elif not myRobot.reachedTarget:
                 print("Going to high rise", myRobot.targetID)
                 myRobot.goToHighRise(myRobot.targetID)
-
                 myRobot.release()
                 print("Deposited box", palletID)
                 if palletID in myRobot.palletIDs:
@@ -231,14 +232,14 @@ def test(myRobot):
         myRobot.move(-myRobot.MAX_SPEED, 500)
 
 
-if robot.mode == COMP:
-    print("This is the competition!")
-    planB(robot)
-elif robot.mode == DEV:
-    print("This is development")
-    robot.palletIDs = [100, 101, 103,104]
-    robot.outerHighriseIDs = [102]
-    planB(robot)
+# if robot.mode == COMP:
+#     print("This is the competition!")
+#     planB(robot)
+# elif robot.mode == DEV:
+#     print("This is development")
+#     robot.palletIDs = [100, 101, 103,104]
+#     robot.outerHighriseIDs = [102]
+#     planB(robot)
 
     #planC(robot)
     #testCurrent(robot)
@@ -248,3 +249,5 @@ elif robot.mode == DEV:
     #robot.getSquareOn(26)
     #testGrabbing(robot)
     #test(robot)
+
+planB(robot)

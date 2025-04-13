@@ -583,7 +583,8 @@ class MyRobot(Robot):
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 800:
-                        self.reachedTarget = self.move(self.MAX_SPEED, distance - 300)
+                        self.move(self.MAX_SPEED, distance - 300)
+                        self.reachedTarget = True
                         targetReached = True
                 else:
                     self.lineUp(markerID)
