@@ -1,11 +1,12 @@
 from myrobot import MyRobot
+from math import pi
 robot = MyRobot()
 
 def planB(myRobot):
     myRobot.release()
     palletID = 0  # Stored until box released next to
-    start = myRobot.time
-    end = myRobot.time
+    start = myRobot.time()
+    end = myRobot.time()
     while True:
         myRobot.getBatteryStatus()
         if myRobot.isTargetBox:
@@ -14,19 +15,21 @@ def planB(myRobot):
                 myRobot.findBestMarker(myRobot.palletIDs)
             elif not myRobot.reachedTarget:
                 print("Going to pallet", myRobot.targetID)
+                myRobot.getSquareOn()
                 myRobot.goToBoxStraight(myRobot.targetID)
-            elif myRobot.isBoxNear() and not myRobot.isHoldingBox():
+            else:
                 myRobot.grab()
-                palletID = myRobot.targetID
-                print("Has box ", palletID, " going to high rise")
-                myRobot.isTargetBox = False
-                myRobot.resetVariables()
-            else: #If has target, reached target but no box grabbed
-                #Reset to find new box
-                myRobot.isTargetBox = True
-                myRobot.resetVariables()
+                if myRobot.isHoldingBox():
+                    palletID = myRobot.targetID
+                    print("Has box ", palletID, " going to high rise")
+                    myRobot.isTargetBox = False
+                    myRobot.resetVariables()
+                else: #If has target, reached target but no box grabbed
+                    #Reset to find new box
+                    myRobot.isTargetBox = True
+                    myRobot.resetVariables()
 
-        elif not myRobot.isHoldingBox() :
+        elif not myRobot.isHoldingBox():
             if myRobot.isBoxNear():
                 print("Box near but not grabbed")
                 myRobot.release()
@@ -39,7 +42,7 @@ def planB(myRobot):
                 myRobot.isTargetBox = True
                 myRobot.resetVariables()
 
-        elif myRobot.boxesPlaced == 3:
+        elif myRobot.boxesPlaced == 4:
             if not myRobot.hasTarget:
                 print("Finding best outer district marker")
                 myRobot.findBestMarker(myRobot.outerDistricts[0])
@@ -51,28 +54,31 @@ def planB(myRobot):
                     myRobot.palletIDs.remove(palletID)
                     myRobot.boxesPlaced += 1
                 print("Pallet ids:", myRobot.palletIDs)
-                myRobot.move(-myRobot.MAX_SPEED, 500)
+                if not myRobot.move(-myRobot.MAX_SPEED, 500):
+                    myRobot.moveEvade(-1)
                 myRobot.isTargetBox = True
                 print("Going to next box")
                 myRobot.resetVariables()
 
-        elif myRobot.boxesPlaced == 4:
+        elif myRobot.boxesPlaced == 3:
             if not myRobot.hasTarget:
                 print("Finding best inner high rise marker")
                 myRobot.findBestMarker(myRobot.innerHighriseID)
             elif not myRobot.reachedTarget:
-                print("Going to outer district")
+                print("Going to inner high rise")
                 myRobot.goToOuterDistrict(myRobot.targetID)
             else:
                 if palletID in myRobot.palletIDs:
                     myRobot.palletIDs.remove(palletID)
                     myRobot.boxesPlaced += 1
                 print("Pallet ids:", myRobot.palletIDs)
-                myRobot.move(-myRobot.MAX_SPEED, 500)
+                if not myRobot.move(-myRobot.MAX_SPEED, 500):
+                    myRobot.moveEvade(-1)
                 myRobot.isTargetBox = True
                 print("Going to next box")
                 myRobot.resetVariables()
 
+        #if number of boxes placed less than 2
         else:  # If target is a outer highrise
             if not myRobot.hasTarget:
                 print("Finding high rise marker")
@@ -87,7 +93,10 @@ def planB(myRobot):
                     myRobot.palletIDs.remove(palletID)
                     myRobot.boxesPlaced += 1
                 print("Pallet ids left:", myRobot.palletIDs)
-                myRobot.move(-myRobot.MAX_SPEED, 500)
+                if not myRobot.move(-myRobot.MAX_SPEED, 500):
+                    myRobot.moveEvade(-1)
+                if not myRobot.turn(myRobot.MAX_SPEED, pi):
+                    myRobot.turnEvade()
                 myRobot.isTargetBox = True
                 print("Going to next box")
                 myRobot.resetVariables()  # Start loop again to look for next box
@@ -217,7 +226,7 @@ def testGrabbing(myRobot):
             myRobot.sleep(1)
 
 def test(myRobot):
-    if not myRobot.move(myRobot.MAX_SPEED, 500):
+    if not myRobot.turn(myRobot.MAX_SPEED, pi):
         myRobot.move(-myRobot.MAX_SPEED, 500)
 
 
@@ -229,7 +238,7 @@ def test(myRobot):
 # robot.palletIDs = robot.localMarkerIDs[zone]
 
 
-#planB(robot)
+planB(robot)
 
 #planC(robot)
 #testCurrent(robot)
@@ -238,4 +247,4 @@ def test(myRobot):
 
 #robot.getSquareOn(26)
 #testGrabbing(robot)
-test(robot)
+#test(robot)

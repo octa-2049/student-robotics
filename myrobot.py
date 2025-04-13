@@ -1,5 +1,6 @@
 from math import pi, degrees
 from sr.robot3 import Robot
+from random import randint
 
 class MyRobot(Robot):
     def __init__(self):
@@ -17,6 +18,8 @@ class MyRobot(Robot):
         self.SPEED_MULTIPLIER = 0.96482070964
         self.MAX_CURRENT = 1
         self.MAX_TIME = 1
+        self.RAND_DIST_MAX = 300 #Max random distance robot will move when evading
+        self.RAND_ANGLE_MAX = 12 #180/RAND_ANGLE_MAX gives angle
         self.POS_DIFF = 0.01 #Position difference between current and previous position
         self.DIAMETER = 90  # Diameter of wheel
         self.WIDTH = 397  # Length of robot from wheel to wheel
@@ -28,8 +31,8 @@ class MyRobot(Robot):
         self.US_TRIGGER = 12  # Trigger pin for ultrasound
         self.US_ECHO = 13  # Echo pin for ultrasound
         self.GRAB_SERVO = self.servo_board.servos[0]
-        self.GRAB_SERVO.position = -1
         self.GRAB_SERVO.set_duty_limits(700, 1900)
+        self.GRAB_SERVO.position = -1
 
         self.SWITCH_LEFT = self.arduino.pins[10]  # Left microswitch
         self.SWITCH_RIGHT = self.arduino.pins[11]  # Right microswitch
@@ -202,6 +205,8 @@ class MyRobot(Robot):
                     if not self.isMoving:
                         end = self.time()
                         if (end - start) > self.MAX_TIME:
+                            #self.moveEvade(speed) #WORRIED ABOUT STACK OVERFLOW
+                            self.stop()
                             return False
                     else:
                         self.isMoving = False
@@ -218,6 +223,7 @@ class MyRobot(Robot):
                 self.RIGHT_MOTOR.power = speed * self.SPEED_MULTIPLIER
                 self.sleep(0.1)
             self.stop()
+            return True
 
     def turn(self, speed, angle=None):
         self.isMoving = True
@@ -239,6 +245,8 @@ class MyRobot(Robot):
                     if not self.isMoving:
                         end = self.time()
                         if (end - start) > self.MAX_TIME:
+                            #self.turnEvade(speed)
+                            self.stop()
                             return False
                     else:
                         self.isMoving = False
@@ -253,23 +261,43 @@ class MyRobot(Robot):
                 self.LEFT_MOTOR.power = speed
                 self.RIGHT_MOTOR.power = -speed * self.SPEED_MULTIPLIER
             self.stop()
+            return True
 
     def randomMovement1(self):
         print("Random movement 1")
-        self.move(-self.MAX_SPEED, 200)
-        self.turn(self.MAX_SPEED, pi / 4)
-        self.move(self.MAX_SPEED, 200)
-
-    def randomMovementBad(self):
-        print("Random movement extra")
-        self.move(self.MAX_SPEED, 200)
-        self.turn(self.MAX_SPEED, pi / 4)
-        self.move(self.MAX_SPEED, 200)
-
-    def evade(self):
         if not self.move(-self.MAX_SPEED, 200):
-            self.turn(self.MAX_SPEED, pi / 4)
-            self.move(self.MAX_SPEED, 200)
+            self.moveEvade(-1)
+        if not self.turn(self.MAX_SPEED, pi / 4):
+            self.turnEvade()
+        if not self.move(self.MAX_SPEED, 200):
+            self.moveEvade(1)
+
+    def moveEvade(self, speed):
+        if speed < 0:
+            if not self.move(self.MAX_SPEED, self.getRandomDistance()):
+                self.sleep(1)
+            else:
+                self.turn(self.chooseDirection(), pi/2)
+                self.move(self.MAX_SPEED, self.getRandomDistance())
+        else:
+            if not self.move(-self.MAX_SPEED, self.getRandomDistance()):
+                self.sleep(1)
+            else:
+                self.turn(self.chooseDirection(), pi/2)
+                self.move(self.MAX_SPEED, self.getRandomDistance())
+        #return None
+
+    def turnEvade(self):
+        if not self.move(-self.MAX_SPEED, self.getRandomDistance()):
+            if not self.move(self.MAX_SPEED, self.getRandomDistance()):
+                self.sleep(1)
+
+        #return None
+
+    def reposition(self, markerID):
+        #NEED TO WRITE
+        #To reposition back to set distance away from certain marker of our
+        return None
 
     def findOne(self, targetIDs=None):
         # returns SINGLE MARKER NOT LIST
@@ -342,24 +370,24 @@ class MyRobot(Robot):
         # else:
         #     targetIDs = self.outerHighriseIDs
         timesTurned = 0  # Times turned in a row
-        start = self.time()
-        end = self.time()
+        # start = self.time()
+        # end = self.time()
         while not self.hasTarget:
             markers = self.findAll(targetIDs)
             # NEEDS TO USE FIND ALL NOT FIND ONE OTHERWISE CANNOT CHOOSE WHICH
             # MARKER BEST ONE
-
             if markers == []:
                 # DO SOMETHING IF NO MARKER FOUND:
-                if timesTurned > self.TURN_FRACTION or (end - start) > self.MAX_TIME:
+                if timesTurned > self.TURN_FRACTION:
                     print("Times turned: ", timesTurned)
-                    print("Time: ", (end-start))
+                    #print("Time: ", (end-start))
                     self.randomMovement1()
                     timesTurned = 0
-                    start = self.time()
-                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)
+                    # start = self.time()
+                if not self.turn(-self.MAX_SPEED, self.ANGLE_TURN):
+                    self.turnEvade()
                 timesTurned += 1
-                end = self.time()
+                # end = self.time()
             else:
                 self.stop()
                 self.targetFace = self.chooseBestMarker(markers)
@@ -379,9 +407,11 @@ class MyRobot(Robot):
                     self.stop()
                 else:
                     if angleOut < 0:  # MORE POSITIVE THAN NEGATIVE
-                        self.turn(-self.MAX_SPEED, -angleOut / 4)
+                        if not self.turn(-self.MAX_SPEED, -angleOut / 4):
+                            self.turnEvade()
                     else:
-                        self.turn(self.MAX_SPEED, angleOut / 4)
+                        if not self.turn(self.MAX_SPEED, angleOut / 4):
+                            self.turnEvade()
             else:
                 return None
 
@@ -415,7 +445,8 @@ class MyRobot(Robot):
                     # If box lost, reset variables
                     return None
                 print("no marker found")
-                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
+                if not self.turn(-self.MAX_SPEED, self.ANGLE_TURN):
+                    self.turnEvade()
                 timesTurned += 1
             else:
                 timesTurned = 0
@@ -424,13 +455,16 @@ class MyRobot(Robot):
                     print("Moving straight")
                     distance = markerInfo.position.distance
                     if not self.move(self.MAX_SPEED, distance / 4):
-                        self.evade()
+                        self.moveEvade(self.MAX_SPEED)
                         #self.move(-self.MAX_SPEED, 100)
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
-                    if distance < 600:  # NEEDS TO BE TESTED
-                        self.move(self.MAX_SPEED, distance * 1.05)
-                        self.reachedTarget = self.goToMarkerUltrasound()
+                    if distance < 600:
+                        if self.move(self.MAX_SPEED, distance * 1.05):
+                            self.reachedTarget = self.goToMarkerUltrasound()
+                        else:
+                            self.moveEvade(self.MAX_SPEED)
+
                         return None
                 else:
                     self.lineUp(markerID)
@@ -443,7 +477,8 @@ class MyRobot(Robot):
             distance = self.getUltrasoundDistance()
             print("Ultrasound distance", distance)
             if (end - start) > 2:
-                self.move(-self.MAX_SPEED, 50)
+                if not self.move(-self.MAX_SPEED, 50):
+                    self.moveEvade(-self.MAX_SPEED)
                 self.move(self.MAX_SPEED)
             if distance < self.ULTRA_CLOSE:
                 self.stop()
@@ -491,7 +526,8 @@ class MyRobot(Robot):
                 if timesTurned > self.TURN_FRACTION:
                     self.resetVariables()  # If box lost, reset variables
                     return None
-                self.turn(self.MAX_SPEED,self.ANGLE_TURN)
+                if not self.turn(self.MAX_SPEED,self.ANGLE_TURN):
+                    self.turnEvade()
                 timesTurned += 1
             else:
                 self.stop()
@@ -531,7 +567,9 @@ class MyRobot(Robot):
                     self.randomMovement1()
                     timesTurned = 0
                 print("no marker found")
-                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
+                if not self.turn(-self.MAX_SPEED, self.ANGLE_TURN):
+                    # NEEDS WAY TO EXIT IF NOT FOUND
+                    self.turnEvade()
                 timesTurned += 1
             else:
                 timesTurned = 0
@@ -539,12 +577,12 @@ class MyRobot(Robot):
                 if self.isLinedUp(markerInfo):
                     print("Moving straight")
                     distance = markerInfo.position.distance
-                    self.move(self.MAX_SPEED, distance / 4)
+                    if not self.move(self.MAX_SPEED, distance / 4):
+                        self.moveEvade(self.MAX_SPEED)
                     # May try to variate speed depending on distance to marker
                     self.sleep(0.5)
                     if distance < 800:
-                        self.move(self.MAX_SPEED, distance - 300)
-                        self.reachedTarget = True
+                        self.reachedTarget = self.move(self.MAX_SPEED, distance - 300)
                         targetReached = True
                 else:
                     self.lineUp(markerID)
@@ -562,7 +600,9 @@ class MyRobot(Robot):
                     # If box lost, reset variables
                     return None
                 print("no marker found")
-                self.turn(-self.MAX_SPEED, self.ANGLE_TURN)  # NEEDS WAY TO EXIT IF NOT FOUND
+                if not self.turn(-self.MAX_SPEED, self.ANGLE_TURN):
+                    # NEEDS WAY TO EXIT IF NOT FOUND
+                    self.turnEvade()
                 timesTurned += 1
             else:
                 timesTurned = 0
@@ -572,9 +612,11 @@ class MyRobot(Robot):
                     distance = markerInfo.position.distance
                     #self.sleep(0.5)
                     if distance < self.DISTRICT_MIN:
-                        self.move(-self.MAX_SPEED, (self.DISTRICT_MIN - distance)/2)
+                        if not self.move(-self.MAX_SPEED, (self.DISTRICT_MIN - distance)/2):
+                            self.moveEvade(-1)
                     elif distance > self.DISTRICT_MAX:
-                        self.move(self.MAX_SPEED, (distance-self.DISTRICT_MAX/2))
+                        if not self.move(self.MAX_SPEED, (distance-self.DISTRICT_MAX/2)):
+                            self.moveEvade(1)
                     else:
                         self.stop()
                         self.reachedTarget = True
@@ -596,7 +638,7 @@ class MyRobot(Robot):
                 self.reachedTarget = False
                 self.release()
                 self.resetVariables()
-                break
+                return False
             if self.isHoldingBox():
                 grabbed = True
                 self.GRAB_SERVO.position = 1
