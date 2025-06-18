@@ -1,3 +1,5 @@
-# Welcome
+# Dependencies
 
-Components requiring attention are viewable in the 'Issues' tab. You can view the current development roadmap by clicking on the 'Projects' tab.
+The Arduino code in this project uses [NicoHood/PinChangeInterrupt](https://github.com/NicoHood/PinChangeInterrupt) by NicoHood.
+
+Follow the instructions here to install: https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries/.
