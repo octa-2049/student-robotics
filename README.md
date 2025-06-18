@@ -1,3 +1,3 @@
 # Status
 
-This challenge has been successfully completed.
+These challenges have been successfully completed.
