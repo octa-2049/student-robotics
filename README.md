@@ -2,9 +2,9 @@
 
 |Challenge|Developer|
 |:-|:-|
-|Mechanics|@ManasGK|
-|Movement|@wlm14127|
-|Sensing|@ARK1309|
+|Mechanics|[@ManasGK](https://github.com/ManasGK)|
+|Movement|[@wlm14127](https://github.com/wlm14127)|
+|Sensing|[@ARK1309](https://github.com/ARK1309)|
 
 # Videos
 
