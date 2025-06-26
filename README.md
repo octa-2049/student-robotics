@@ -10,7 +10,7 @@
 
 |Challenge|Video|
 |:-|:-|
-|Mechanics|[https://www.youtube.com/watch?v=2xOR0aXdENk](https://www.youtube.com/watch?v=2xOR0aXdENk)|
-|Movement|[https://www.youtube.com/watch?v=uN8QE9klEIw](https://www.youtube.com/watch?v=uN8QE9klEIw)|
-|Sensing (Angle)|[https://www.youtube.com/watch?v=s8hyClghzv8](https://www.youtube.com/watch?v=s8hyClghzv8)|
-|Sensing (Distance)|[https://www.youtube.com/watch?v=yGvEcVdp-9U](https://www.youtube.com/watch?v=yGvEcVdp-9U)|
+|Mechanics|[https://youtu.be/2xOR0aXdENk](https://youtu.be/2xOR0aXdENk)|
+|Movement|[https://youtu.be/uN8QE9klEIw](https://youtu.be/uN8QE9klEIw)|
+|Sensing (Angle)|[https://youtu.be/s8hyClghzv8](https://youtu.be/s8hyClghzv8)|
+|Sensing (Distance)|[https://youtu.be/yGvEcVdp-9U](https://youtu.be/yGvEcVdp-9U)|
