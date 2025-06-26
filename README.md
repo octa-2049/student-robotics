@@ -12,4 +12,4 @@ Follow the instructions here to install: https://docs.arduino.cc/software/ide-v1
 ## Notes
 
 -  The `MyRobot.getYawRad()` function was written by [@octa-2049](https://github.com/octa-2049), with modifications made by [@ARK1309](https://github.com/ARK1309).
--  The original function, `MyRobot.calculate_real_yaw_any()`, can be found [here](https://github.com/octa-2049/student-robotics/blob/main/competition/virtual_league/robot.py).
+-  The original function, `MyRobot.calculate_real_yaw()`, can be found [here](https://github.com/octa-2049/student-robotics/blob/main/competition/virtual_league/robot.py).
