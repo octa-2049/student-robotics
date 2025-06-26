@@ -1,6 +1,6 @@
 # Welcome
 
-This repository contains an archive of the code for **Student Robotics 2025**. You can find out more about the competition here: [https://studentrobotics.org/](https://studentrobotics.org/).
+This repository contains an archive of the code **Team KEG** used for **Student Robotics 2025**. You can find out more about the competition here: [https://studentrobotics.org/](https://studentrobotics.org/).
 
 # Navigation
 
