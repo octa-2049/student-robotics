@@ -5,7 +5,7 @@ This branch contains code written for the **Virtual League**, alongside a high-l
 ## Files
 
 - `robot.py`: code submitted to Student Robotics.
-- `report.pdf`: brief overview of the Virtual League and the inner workings of the code.
+- `report.pdf`: brief overview of the Virtual League and the inner workings of the code. To click on the links in the document, you will need to download it.
 
 ## Installation
 
