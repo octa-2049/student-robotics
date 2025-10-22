@@ -19,9 +19,11 @@ You can run the code we submitted to Student Robotics yourself. You will need th
 
 1. Install **Python 3.11** and **Webots R2023b**.
 2. Download **sbot_simulator-2025.1.1** and unzip it.
-3. Run `setup.py` - this will be in the folder you just unzipped.
+3. Run `setup.py` – this will be in the folder you just unzipped.
 4. Open the `zone_0` folder and replace the `robot.py` file there with the one from this branch.
 5. Run `run_simulator.py` to open the virtual arena.
+
+For a quick guide on using Webots, click [here](https://studentrobotics.org/docs/simulator/using_the_simulator). You can also use `readme.html` in the folder you unzipped.
 
 ## Author
 
